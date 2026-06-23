@@ -14,7 +14,7 @@ const scenarios = [
   { label: "TRAVEL — intl hotel", amount: 50000, category: "travel", channel: "online", isInternational: true },
 ];
 
-console.log("\n  CC ADVISOR — effective-value engine (researched 2026 data)\n");
+console.log("\n  CardIQ — effective-value engine (researched 2026 data)\n");
 console.log(valuationReport());
 console.log("\n  HDFC YTD ₹3.8L (near ₹4L milestone) · Axis YTD ₹2.9L (near ₹3L tier)");
 

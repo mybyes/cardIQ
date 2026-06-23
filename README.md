@@ -1,4 +1,4 @@
-# CC Advisor
+# CardIQ
 
 A platform to **optimise earning *and* burning of points** across cards, loyalty
 programs and websites.

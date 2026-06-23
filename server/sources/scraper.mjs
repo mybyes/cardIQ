@@ -38,7 +38,7 @@ export function scrapeFixture() {
 // Best-effort live fetch. Bank/merchant pages frequently 403 bots — handled gracefully.
 export async function scrapeLive(url) {
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 CCAdvisorBot" }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 CardIQBot" }, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return { ok: false, offers: [], note: `HTTP ${res.status} (public pages often block bots — prefer official/affiliate feeds)` };
     return { ok: true, offers: parseOffersHTML(await res.text()), note: `fetched ${url}` };
   } catch (e) {

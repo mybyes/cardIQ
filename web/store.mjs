@@ -4,7 +4,7 @@
 // so the rest of the app keeps calling store.get('selectedCards') unchanged.
 import { user as seed } from "../data.mjs";
 
-const KEY = "cc-advisor-v2";
+const KEY = "cardiq-v1";
 const PROFILE_KEYS = new Set(["selectedCards", "ledger", "planRows", "spendToDate", "monthlySpend", "pointsBalance", "expiring"]);
 
 const DEFAULT_PLAN = [

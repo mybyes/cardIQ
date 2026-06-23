@@ -2,7 +2,8 @@
 // (the app still works fully off bundled data + localStorage).
 // - Local split-server dev (static on :4321, API on :4322) → talk to :4322.
 // - Served by the Node server itself (Railway, or local :4322) → same-origin "/api".
-const API = location.port === "4321" ? "http://localhost:4322" : "";
+const META = document.querySelector('meta[name="cardiq-api"]')?.content?.trim();
+const API = META || (location.port === "4321" ? "http://localhost:4322" : "");
 export const API_URL = API || location.origin;
 
 async function call(path, opts) {

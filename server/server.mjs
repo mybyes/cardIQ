@@ -1,4 +1,4 @@
-// CC Advisor data-platform API (zero-dependency node:http).
+// CardIQ data-platform API (zero-dependency node:http).
 // Data in the DB, engine on the server → thin clients. Run: node server/server.mjs
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
@@ -122,4 +122,4 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`CC Advisor API on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`CardIQ on http://localhost:${PORT}`));
