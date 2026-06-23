@@ -7,82 +7,134 @@
     <!-- Split deploy (static front-end + API on Railway): paste your Railway URL here.
          Leave empty when one server hosts both (Railway full-stack) or for local dev. -->
     <meta name="cardiq-api" content="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: #0e1116; --panel: #171c24; --panel2: #1f2630; --line: #2a323d;
-        --text: #e6edf3; --muted: #8b97a7; --accent: #4cc2ff; --good: #3fb950;
-        --warn: #d29922; --bad: #f85149; --star: #e3b341;
+        --bg: #f4f5f8; --panel: #ffffff; --panel2: #f3f5f9; --line: #e6e8ef;
+        --text: #0f1626; --muted: #697185;
+        --accent: #4f46e5; --accent-weak: #eef0fe; --accent-ink: #ffffff;
+        --good: #0a9d57; --good-weak: #e8f6ee;
+        --warn: #9a6700; --bad: #d63649; --bad-weak: #fdecee; --star: #b8860b;
+        --shadow: 0 1px 2px rgba(16,24,40,.04), 0 2px 6px rgba(16,24,40,.05);
+        --shadow-lg: 0 6px 24px rgba(16,24,40,.09);
+        --radius: 16px;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      header { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-      header h1 { font-size: 18px; margin: 0; }
-      header .sub { color: var(--muted); font-size: 13px; }
-      .wrap { max-width: 880px; margin: 0 auto; padding: 20px; }
-      .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-      .tab { padding: 8px 16px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; color: var(--muted); }
-      .tab.active { background: var(--accent); color: #042438; border-color: var(--accent); font-weight: 600; }
-      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
-      h2 { font-size: 15px; margin: 0 0 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-      label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 4px; }
-      input, select, textarea { width: 100%; background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 9px; padding: 9px 11px; font: inherit; }
-      .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 12px; }
-      .chk { display: flex; gap: 16px; align-items: center; margin: 4px 0 14px; flex-wrap: wrap; }
-      .chk label { display: flex; align-items: center; gap: 6px; color: var(--text); margin: 0; }
-      .chk input { width: auto; }
-      button.go { background: var(--accent); color: #042438; border: 0; border-radius: 9px; padding: 11px 22px; font-weight: 700; cursor: pointer; font-size: 15px; }
-      .card { border: 1px solid var(--line); border-radius: 11px; padding: 13px 15px; margin-bottom: 10px; background: var(--panel2); }
-      .card.best { border-color: var(--good); box-shadow: 0 0 0 1px var(--good) inset; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+      }
+      .num, .total, .val, td.num { font-variant-numeric: tabular-nums; }
+
+      /* ---- sticky top bar (brand + controls + nav) ---- */
+      .topbar { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.85); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+      header { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      header h1 { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -.02em; white-space: nowrap; }
+      .brand-iq { color: var(--accent); }
+      header .sub { color: var(--muted); font-size: 12.5px; }
+      header .spacer { margin-left: auto; }
+
+      nav.nav { max-width: 1040px; margin: 0 auto; padding: 0 12px; }
+      .tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab { padding: 11px 14px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: color .15s; }
+      .tab:hover { color: var(--text); }
+      .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 26px 20px 64px; }
+
+      /* ---- panels & sections ---- */
+      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); }
+      h2 { font-size: 15px; font-weight: 650; margin: 0 0 14px; color: var(--text); letter-spacing: -.01em; }
+      h2 .meta { font-weight: 400; }
+
+      /* ---- form controls ---- */
+      label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 5px; font-weight: 500; }
+      input, select, textarea { width: 100%; background: #fff; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 10px 12px; font: inherit; transition: border-color .15s, box-shadow .15s; }
+      input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+      .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px; }
+      .chk { display: flex; gap: 18px; align-items: center; margin: 6px 0 14px; flex-wrap: wrap; }
+      .chk label { display: flex; align-items: center; gap: 7px; color: var(--text); margin: 0; font-size: 14px; }
+      .chk input { width: auto; accent-color: var(--accent); }
+
+      /* ---- buttons ---- */
+      button.go { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 11px 20px; font-weight: 600; cursor: pointer; font-size: 14.5px; box-shadow: var(--shadow); transition: filter .15s, transform .05s; }
+      button.go:hover { filter: brightness(1.07); }
+      button.go:active { transform: translateY(1px); }
+
+      /* ---- cards ---- */
+      .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: var(--panel2); transition: box-shadow .15s; }
+      .card.best { border-color: var(--accent); background: var(--accent-weak); box-shadow: 0 0 0 1px var(--accent) inset; }
       .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-      .card .name { font-weight: 700; font-size: 16px; }
+      .card .name { font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
       .card .val { font-weight: 800; font-size: 18px; }
       .card .val small { font-weight: 500; color: var(--muted); font-size: 12px; }
-      .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--good); color: #042; font-weight: 700; margin-left: 8px; }
-      .bd { color: var(--muted); font-size: 13px; margin-top: 8px; }
+      .badge { font-size: 10.5px; padding: 3px 9px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; margin-left: 8px; letter-spacing: .03em; text-transform: uppercase; vertical-align: middle; }
+
+      /* ---- text helpers ---- */
+      .bd { color: var(--muted); font-size: 13.5px; margin-top: 8px; }
       .bd div { padding: 1px 0; }
+      .bd b { color: var(--text); font-weight: 600; }
       .warn { color: var(--warn); }
       .star { color: var(--star); }
-      .bar { height: 8px; border-radius: 999px; background: var(--panel); overflow: hidden; margin: 5px 0; border: 1px solid var(--line); }
-      .bar > span { display: block; height: 100%; background: var(--accent); }
       .meta { color: var(--muted); font-size: 12px; }
-      table { width: 100%; border-collapse: collapse; font-size: 14px; }
-      td, th { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
-      th { color: var(--muted); font-weight: 600; font-size: 12px; }
-      td.num { text-align: right; font-variant-numeric: tabular-nums; }
+      .hint { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
       .leak { color: var(--bad); font-weight: 600; }
       .ok { color: var(--good); }
-      textarea { min-height: 96px; resize: vertical; font-family: ui-monospace, monospace; font-size: 13px; }
-      .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
-      .total { font-size: 22px; font-weight: 800; }
-      .disclaimer { color: var(--muted); font-size: 11px; margin-top: 4px; }
+      .total { font-size: 26px; font-weight: 800; letter-spacing: -.02em; display: inline-block; margin-top: 2px; }
+
+      /* ---- progress bar ---- */
+      .bar { height: 7px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 6px 0; }
+      .bar > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+      /* ---- tables ---- */
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      td, th { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+      tr:last-child td { border-bottom: 0; }
+      th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+      td.num, th.num { text-align: right; }
+
+      textarea { min-height: 96px; resize: vertical; font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
+      .disclaimer { color: var(--muted); font-size: 11.5px; margin-top: 8px; text-align: center; }
+      code { background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; font-size: 12.5px; }
+      a { color: var(--accent); }
+
+      @media (max-width: 620px) { header .sub { display: none; } }
     </style>
   </head>
   <body>
-    <header>
-      <h1>💳 CardIQ</h1>
-      <span class="sub">optimise earning &amp; burning of points · across cards, loyalty &amp; websites · India 2026</span>
-      <span style="margin-left:auto"></span>
-      <span id="profilebar" style="display:flex; gap:6px; align-items:center"></span>
-      <label style="margin:0">
-        valuation
-        <select id="mode" style="width:auto; display:inline-block; margin-left:6px">
-          <option value="best">best (optimizer)</option>
-          <option value="typical" selected>typical</option>
-          <option value="floor">floor (cashback)</option>
-        </select>
-      </label>
-    </header>
+    <div class="topbar">
+      <header>
+        <h1>💳 Card<span class="brand-iq">IQ</span></h1>
+        <span class="sub">optimise earning &amp; burning of points · cards, loyalty &amp; websites · India</span>
+        <span class="spacer"></span>
+        <span id="profilebar" style="display:flex; gap:6px; align-items:center"></span>
+        <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:12px">
+          valuation
+          <select id="mode" style="width:auto">
+            <option value="best">best</option>
+            <option value="typical" selected>typical</option>
+            <option value="floor">floor</option>
+          </select>
+        </label>
+      </header>
+      <nav class="nav">
+        <div class="tabs">
+          <div class="tab active" data-tab="home">Home</div>
+          <div class="tab" data-tab="recommend">Recommend</div>
+          <div class="tab" data-tab="plan">Plan</div>
+          <div class="tab" data-tab="wallet">Wallet</div>
+          <div class="tab" data-tab="redeem">Redeem</div>
+          <div class="tab" data-tab="coach">Coach</div>
+          <div class="tab" data-tab="getcard">＋ Get a card</div>
+          <div class="tab" data-tab="cards">⚙ Cards</div>
+        </div>
+      </nav>
+    </div>
     <div class="wrap">
-      <div class="tabs">
-        <div class="tab active" data-tab="home">Home</div>
-        <div class="tab" data-tab="recommend">Recommend</div>
-        <div class="tab" data-tab="plan">Plan</div>
-        <div class="tab" data-tab="wallet">Wallet</div>
-        <div class="tab" data-tab="redeem">Redeem</div>
-        <div class="tab" data-tab="coach">Coach</div>
-        <div class="tab" data-tab="getcard">＋ Get a card</div>
-        <div class="tab" data-tab="cards">⚙ Cards</div>
-      </div>
       <div id="home"></div>
       <div id="recommend" hidden></div>
       <div id="plan" hidden></div>
@@ -91,7 +143,7 @@
       <div id="coach" hidden></div>
       <div id="getcard" hidden></div>
       <div id="cards" hidden></div>
-      <p class="disclaimer">Illustrative + researched data (June 2026). Verify against issuer T&Cs before financial decisions.</p>
+      <p class="disclaimer">Illustrative + researched data (2026). Verify against issuer T&Cs before financial decisions.</p>
     </div>
     <script type="module" src="/web/app.js"></script>
   </body>
