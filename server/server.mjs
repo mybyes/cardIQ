@@ -1,6 +1,9 @@
 // CC Advisor data-platform API (zero-dependency node:http).
 // Data in the DB, engine on the server → thin clients. Run: node server/server.mjs
 import { createServer } from "node:http";
+import { readFile } from "node:fs/promises";
+import { join, normalize, extname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { getDB, tx } from "./db.mjs";
 import { seedIfEmpty } from "./seed.mjs";
 import { SOURCES, runSource } from "./sources/index.mjs";
@@ -10,6 +13,23 @@ import { resolveOffers } from "../offers.mjs";
 
 seedIfEmpty();
 const PORT = process.env.PORT || 4322;
+const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), ".."); // project root
+
+const MIME = { ".html": "text/html", ".js": "application/javascript", ".mjs": "application/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".png": "image/png" };
+
+// Serve the static web app (so one Node process hosts API + UI — ideal for Railway).
+async function serveStatic(res, pathname) {
+  let rel = pathname === "/" ? "/web/index.html" : pathname;
+  const filePath = normalize(join(ROOT, rel));
+  if (!filePath.startsWith(ROOT)) return json(res, 403, { error: "forbidden" }); // no traversal
+  try {
+    const body = await readFile(filePath);
+    res.writeHead(200, { "Content-Type": (MIME[extname(filePath)] ?? "application/octet-stream") + "; charset=utf-8" });
+    res.end(body);
+  } catch {
+    json(res, 404, { error: "not found", path: pathname });
+  }
+}
 
 const json = (res, code, body) => {
   res.writeHead(code, {
@@ -94,6 +114,8 @@ const server = createServer(async (req, res) => {
       return json(res, 200, planAllocation(body.items ?? [], getDB().cards, userOf(), liveOffers(), body.mode || "typical"));
     }
 
+    // anything not under /api → static web app
+    if (req.method === "GET" && !path.startsWith("/api/")) return serveStatic(res, path);
     return json(res, 404, { error: "not found", path });
   } catch (e) {
     return json(res, 500, { error: String(e.message || e) });

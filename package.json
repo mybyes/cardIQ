@@ -1,0 +1,12 @@
+{
+  "name": "cc-advisor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Optimise earning & burning of credit-card points across cards, loyalty programs and websites (India).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/server.mjs",
+    "dev": "node server/server.mjs"
+  }
+}
