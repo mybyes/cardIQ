@@ -20,6 +20,11 @@ let offers = resolveOffers(rawOffers).offers; // expiry + dedupe + conflict-reso
 let dataSource = "bundled";
 const rupee = (n) => (n < 0 ? "-₹" : "₹") + Math.abs(Math.round(n || 0)).toLocaleString("en-IN");
 
+// Card brand identity — a coloured initials chip per card.
+const BRAND = { "hdfc-infinia": "#004C8F", "axis-atlas": "#97144D", "amazon-pay-icici": "#FF9900", "flipkart-axis": "#2874F0", "sbi-cashback": "#22409A" };
+const initials = (name) => (name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+const cardChip = (id) => byId[id] ? `<span class="chip" style="background:${BRAND[id] || "#5b6472"}">${initials(byId[id].name)}</span>` : "";
+
 // Pull catalog + (already-resolved) offers from the data platform; fall back silently.
 async function syncFromPlatform(opts = {}) {
   try {
@@ -139,6 +144,14 @@ function homeUI() {
     .map(([c, a]) => `<tr><td>${c}</td><td class="num">${rupee(a)}</td><td class="num meta">${total ? ((a / total) * 100).toFixed(0) : 0}%</td></tr>`)
     .join("");
 
+  // visual spend chart (horizontal bars by share)
+  const maxCat = Math.max(1, ...Object.values(byCat));
+  const spendBars = Object.entries(byCat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([c, a]) => `<div class="hbar"><span>${c}</span><div class="track"><span style="width:${(a / maxCat) * 100}%"></span></div><b>${rupee(a)}</b></div>`)
+    .join("");
+
   el("home").innerHTML = `
     <div class="hero">
       <h1>Earn more. Burn smarter.</h1>
@@ -149,18 +162,20 @@ function homeUI() {
         <button class="ghost" data-tab="redeem">What are my points worth?</button>
       </div>
     </div>
-    <div class="panel">
-      <h2>Your snapshot</h2>
-      <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:4px">
-        <div>Spend tracked<br><span class="total">${rupee(total)}</span></div>
-        <div>Rewards earned<br><span class="total ok">${rupee(rs.earned)}</span></div>
-        <div>Left on the table<br><span class="total ${rs.leftOnTable > 0 ? "leak" : "ok"}">${rupee(rs.leftOnTable)}</span></div>
-      </div>
-      ${U.ledger.length === 0 ? '<div class="hint" style="margin-top:8px">No transactions yet — import bank SMS in <b>Coach</b> to populate this.</div>' : ""}
+
+    <div class="grid grid-3">
+      <div class="stat"><div class="l">📊 Spend tracked</div><div class="v">${rupee(total)}</div></div>
+      <div class="stat"><div class="l">✨ Rewards earned</div><div class="v ok">${rupee(rs.earned)}</div></div>
+      <div class="stat"><div class="l">📉 Left on the table</div><div class="v ${rs.leftOnTable > 0 ? "leak" : "ok"}">${rupee(rs.leftOnTable)}</div></div>
     </div>
-    <div class="panel"><h2>Needs your attention (${items.length})</h2>${itemRows}</div>
-    ${topCats ? `<div class="panel"><h2>Where your money goes</h2><table><tr><th>Category</th><th class="num">Spend</th><th class="num">Share</th></tr>${topCats}</table></div>` : ""}
+
+    <div class="grid grid-2">
+      <div class="panel"><h2>Needs your attention <span class="meta">(${items.length})</span></h2>${itemRows}</div>
+      <div class="panel"><h2>Where your money goes</h2>${spendBars || '<div class="bd">No spend tracked yet — import transactions in <b>Coach</b>.</div>'}</div>
+    </div>
+
     ${recurringPanel(U)}
+
     <div class="panel"><h2>Quick actions</h2>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
         <button class="go" data-tab="recommend">Which card to use?</button>
@@ -315,7 +330,7 @@ function runRecommend() {
         const delta = i === 0 ? "" : ` · ${rupee(ranked[0].value - r.value)} less than best`;
         return `<div class="card ${i === 0 ? "best" : ""}">
           <div class="top">
-            <div class="name">${r.name}${i === 0 ? '<span class="badge">USE THIS</span>' : ""}${r.milestoneINR > 0 ? ' <span class="star">⭐</span>' : ""}</div>
+            <div class="name" style="display:flex; align-items:center; gap:11px">${cardChip(r.cardId)}<span>${r.name}${i === 0 ? '<span class="badge">USE THIS</span>' : ""}${r.milestoneINR > 0 ? ' <span class="star">⭐</span>' : ""}</span></div>
             <div class="val">${rupee(r.value)} <small>(${r.pct.toFixed(1)}%)${delta}</small></div>
           </div>
           <div class="bd">${bd}${warn}</div>
@@ -413,7 +428,7 @@ function walletUI() {
       const cur = c.reward.currency;
       const spent = U.spendToDate?.[id] ?? 0;
       const bal = U.pointsBalance?.[id];
-      let html = `<div class="card"><div class="top"><div class="name">${c.name}</div><div class="meta">${c.issuer} · ${c.network}</div></div>`;
+      let html = `<div class="card"><div class="top"><div class="name" style="display:flex; align-items:center; gap:11px">${cardChip(id)}<span>${c.name}</span></div><div class="meta">${c.issuer} · ${c.network}</div></div>`;
       if (bal != null && cur !== "CASHBACK")
         html += `<div class="bd">Balance: <b>${bal.toLocaleString("en-IN")}</b> ${currencies[cur].name} ≈ <b>${rupee(bal * valuePerUnit(cur, mode()))}</b> (${mode()})</div>`;
       const next = (c.milestones ?? []).find((m) => spent < m.threshold);
@@ -708,7 +723,25 @@ function gcAnalyse() {
   el("gc-total").textContent = `Annual spend modelled: ${rupee(annual)} · you hold ${U.cards.length}/${cards.length} cards`;
 
   if (U.cards.length >= cards.length) {
-    el("gc-out").innerHTML = `<div class="panel"><div class="bd">You already hold every card in the catalog 🎉</div></div>`;
+    const cats = [
+      { category: "travel", merchant: "smartbuy", channel: "online", viaPortal: true },
+      { category: "electronics", merchant: "flipkart", channel: "online" },
+      { category: "appliances", merchant: "croma", channel: "offline" },
+      { category: "grocery", merchant: "bigbasket", channel: "online" },
+      { category: "dining", merchant: "swiggy", channel: "online" },
+      { category: "shopping", merchant: "myntra", channel: "online" },
+    ];
+    const leaders = cats
+      .map((c) => {
+        const top = new WalletState(U).rank(cards, { ...c, amount: 10000, label: c.category }, offers, mode()).sort((a, b) => b.steady - a.steady)[0];
+        return `<div class="card"><div class="meta" style="text-transform:capitalize">${c.category}</div>
+          <div style="display:flex; align-items:center; gap:9px; margin-top:6px">${cardChip(top.cardId)}<b>${top.name}</b></div>
+          <div class="meta" style="margin-top:4px">${top.steadyPct.toFixed(1)}% value</div></div>`;
+      })
+      .join("");
+    el("gc-out").innerHTML = `<div class="panel"><h2>Your wallet is complete 🎉</h2>
+      <div class="bd">You hold every card we track. Here's the best card to swipe in each category:</div>
+      <div class="grid grid-3" style="margin-top:14px">${leaders}</div></div>`;
     return;
   }
   const profile = profileFromMonthly(monthly);
@@ -719,7 +752,7 @@ function gcAnalyse() {
       const feeNote = r.feeWaiverSpend > 0 ? `₹${r.fee.toLocaleString("en-IN")} fee, waived at ${rupee(r.feeWaiverSpend)} spend` : r.fee ? `₹${r.fee.toLocaleString("en-IN")} fee` : "lifetime free";
       return `<div class="card ${i === 0 && good ? "best" : ""}">
         <div class="top">
-          <div class="name">${r.card.name}${i === 0 && good ? '<span class="badge">BEST ADD</span>' : ""}</div>
+          <div class="name" style="display:flex; align-items:center; gap:11px">${cardChip(r.card.id)}<span>${r.card.name}${i === 0 && good ? '<span class="badge">BEST ADD</span>' : ""}</span></div>
           <div class="val ${good ? "ok" : ""}">${good ? "+" : ""}${rupee(r.net)}/yr <small>net</small></div>
         </div>
         <div class="bd">+${rupee(r.incrementalReward)}/yr extra rewards · <span class="meta">${feeNote}</span></div>
@@ -739,8 +772,8 @@ function cardsUI() {
       <div class="hint">Tick the cards you own — every other tab works off this list.</div>
       <div id="card-list" style="margin-top:12px">${cards
         .map(
-          (c) => `<label class="card" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer">
-            <span><b>${c.name}</b> <span class="meta">${c.issuer} · ${c.network} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</span></span>
+          (c) => `<label class="card" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:11px">
+            <span style="display:flex; align-items:center; gap:11px">${cardChip(c.id)}<span><b>${c.name}</b> <span class="meta">${c.issuer} · ${c.network} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</span></span></span>
             <input type="checkbox" data-id="${c.id}" ${sel.has(c.id) ? "checked" : ""} style="width:auto" />
           </label>`
         )
