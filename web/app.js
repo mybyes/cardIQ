@@ -140,6 +140,15 @@ function homeUI() {
     .join("");
 
   el("home").innerHTML = `
+    <div class="hero">
+      <h1>Earn more. Burn smarter.</h1>
+      <p>CardIQ tells you which card to swipe for every purchase — and turns your points into the most valuable flights and stays.</p>
+      ${rs.leftOnTable > 0 ? `<div class="alert">💸 You left <b>${rupee(rs.leftOnTable)}</b> on the table on recent spends — let's fix that.</div>` : ""}
+      <div class="cta">
+        <button class="primary" data-tab="recommend">Which card should I use?</button>
+        <button class="ghost" data-tab="redeem">What are my points worth?</button>
+      </div>
+    </div>
     <div class="panel">
       <h2>Your snapshot</h2>
       <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:4px">
