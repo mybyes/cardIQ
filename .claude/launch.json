@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cardiq",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server/server.mjs"],
+      "port": 4322,
+      "autoPort": false
+    }
+  ]
+}
