@@ -45,6 +45,11 @@
       .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
       .wrap { max-width: 1040px; margin: 0 auto; padding: 26px 20px 64px; }
+      .subnav { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+      .subnav:empty { display: none; }
+      .sub { background: var(--panel); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 7px 16px; font-size: 13.5px; font-weight: 500; cursor: pointer; box-shadow: var(--shadow); transition: all .15s; }
+      .sub:hover { color: var(--text); }
+      .sub.on { background: var(--accent-weak); color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
       /* ---- panels & sections ---- */
       .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); }
@@ -150,21 +155,20 @@
             <option value="floor">Conservative</option>
           </select>
         </label>
+        <button id="nav-cards" title="Manage your cards" style="background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:6px 11px; cursor:pointer; font-size:14px">⚙</button>
       </header>
       <nav class="nav">
         <div class="tabs">
           <div class="tab active" data-tab="home">Home</div>
-          <div class="tab" data-tab="recommend">Recommend</div>
-          <div class="tab" data-tab="plan">Plan</div>
-          <div class="tab" data-tab="wallet">Wallet</div>
-          <div class="tab" data-tab="redeem">Redeem</div>
-          <div class="tab" data-tab="coach">Coach</div>
+          <div class="tab" data-tab="recommend">Use a card</div>
+          <div class="tab" data-tab="wallet">Points</div>
+          <div class="tab" data-tab="coach">Review</div>
           <div class="tab" data-tab="getcard">＋ Get a card</div>
-          <div class="tab" data-tab="cards">⚙ Cards</div>
         </div>
       </nav>
     </div>
     <div class="wrap">
+      <div class="subnav" id="subnav"></div>
       <div id="home"></div>
       <div id="recommend" hidden></div>
       <div id="plan" hidden></div>

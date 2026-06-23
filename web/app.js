@@ -73,13 +73,28 @@ const appUser = () => ({
 const CATS = ["appliances", "electronics", "travel", "grocery", "dining", "shopping", "transport", "other"];
 const tabs = ["home", "recommend", "plan", "wallet", "redeem", "coach", "getcard", "cards"];
 
-// ---------- tab switching ----------
+// ---------- tab switching (grouped: fewer primary tabs + light sub-nav) ----------
+const GROUP_OF = { home: "home", recommend: "use", plan: "use", wallet: "points", redeem: "points", coach: "review", getcard: "getcard", cards: "cards" };
+const GROUP_CONTAINERS = { use: ["recommend", "plan"], points: ["wallet", "redeem"] };
+const SUB_LABEL = { recommend: "Use a card", plan: "Plan ahead", wallet: "Cards & balances", redeem: "Redeem & goals" };
+
+function renderSubnav(active) {
+  const box = el("subnav");
+  if (!box) return;
+  const subs = GROUP_CONTAINERS[GROUP_OF[active]];
+  box.innerHTML = subs ? subs.map((c) => `<button class="sub ${c === active ? "on" : ""}" data-sub="${c}">${SUB_LABEL[c]}</button>`).join("") : "";
+  box.querySelectorAll("[data-sub]").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.sub)));
+}
 function switchTab(name) {
-  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x.dataset.tab === name));
+  const grp = GROUP_OF[name];
+  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", GROUP_OF[x.dataset.tab] === grp));
   tabs.forEach((t) => (el(t).hidden = t !== name));
+  renderSubnav(name);
   render();
+  window.scrollTo(0, 0);
 }
 document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+el("nav-cards").addEventListener("click", () => switchTab("cards"));
 
 // header valuation mode
 el("mode").value = mode();
@@ -411,20 +426,44 @@ function planOptimize() {
     return;
   }
   const plan = planAllocation(items, cards, U, offers, mode());
-  const allocRows = plan.allocations
-    .map((a) => `<tr><td>${rupee(a.item.amount)}</td><td>${a.item.merchant || a.item.category}</td><td><b>${a.card}</b>${a.milestoneINR > 0 ? " ⭐" : ""}</td><td class="num ok">${rupee(a.value)} <span class="meta">(${a.pct.toFixed(1)}%)</span></td></tr>`)
+
+  // group by CARD (card-primary): "put these purchases on this card"
+  const byCard = {};
+  for (const a of plan.allocations) {
+    const g = (byCard[a.cardId] ??= { name: a.card, cardId: a.cardId, items: [], total: 0, milestone: 0 });
+    g.items.push(a);
+    g.total += a.value;
+    g.milestone += a.milestoneINR;
+  }
+  const cardCards = Object.values(byCard)
+    .sort((x, y) => y.total - x.total)
+    .map(
+      (g) => `<div class="card">
+        <div class="top">
+          <div class="name" style="display:flex; align-items:center; gap:11px">${cardChip(g.cardId)}<span>${g.name}</span></div>
+          <div class="val ok">${rupee(g.total)} <small>back</small></div>
+        </div>
+        <div class="bd">${g.items.map((a) => `<div>${rupee(a.item.amount)} · ${a.item.merchant || a.item.category}</div>`).join("")}</div>
+        ${g.milestone > 0 ? `<div class="bd"><span class="star">⭐ includes ${rupee(g.milestone)} one-time milestone bonus</span></div>` : ""}
+      </div>`
+    )
     .join("");
+
   const plannedSpend = items.reduce((s, r) => s + num(r.amount), 0);
+  const totalMilestone = plan.allocations.reduce((s, a) => s + a.milestoneINR, 0);
+  const everydayRate = ((plan.totalValue - totalMilestone) / plannedSpend) * 100;
   const ms = plan.milestones.map((m) => `<div class="bd ok">⭐ ${m.card}: unlocks ${m.label} (~${rupee(m.valueINR)})</div>`).join("");
   const fw = plan.fees.map((f) => `<div class="bd ok">💳 ${f.card}: annual fee ₹${f.fee.toLocaleString("en-IN")} gets waived</div>`).join("");
   const nudge = plan.nudges.map((n) => `<div class="bd warn">↗ ${n.card}: add ${rupee(n.gap)} → ${n.label}${n.reward ? ` (+${n.reward} pts)` : ""}</div>`).join("");
   el("p-out").innerHTML = `
-    <div class="panel"><h2>Optimised allocation</h2>
-      <table><tr><th>Amount</th><th>For</th><th>Use card</th><th class="num">Value</th></tr>${allocRows}</table>
-      <div style="margin-top:14px; display:flex; gap:24px; flex-wrap:wrap">
+    <div class="panel"><h2>Put each purchase on the right card</h2>${cardCards}
+      <div style="margin-top:14px; display:flex; gap:28px; flex-wrap:wrap">
         <div>Planned spend<br><span class="total">${rupee(plannedSpend)}</span></div>
-        <div>Total value back<br><span class="total ok">${rupee(plan.totalValue)}</span> <span class="meta">(${((plan.totalValue / plannedSpend) * 100).toFixed(1)}%)</span></div>
+        <div>Value back<br><span class="total ok">${rupee(plan.totalValue)}</span></div>
+        <div>Everyday rate<br><span class="total">${everydayRate.toFixed(1)}%</span></div>
+        ${totalMilestone > 0 ? `<div>One-time bonuses<br><span class="total star">${rupee(totalMilestone)}</span></div>` : ""}
       </div>
+      ${totalMilestone > 0 ? `<div class="hint">"Everyday rate" excludes one-time milestone bonuses, so it's the repeatable return — not inflated by a single milestone.</div>` : ""}
     </div>
     ${ms || fw ? `<div class="panel"><h2>Unlocked by this plan</h2>${ms}${fw}</div>` : ""}
     ${nudge ? `<div class="panel"><h2>Push a little further</h2>${nudge}</div>` : ""}`;
