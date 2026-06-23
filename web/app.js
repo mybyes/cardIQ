@@ -1,8 +1,17 @@
 import { cards as seedCards, offers as rawOffers, user as seedUser } from "../data.mjs";
 import { resolveOffers } from "../offers.mjs";
 import { WalletState } from "../state.mjs";
-import { valuePerUnit, currencies, redemptionPlan } from "../valuation.mjs";
+import { valuePerUnit, currencies, redemptionPlan, DATA_VERIFIED } from "../valuation.mjs";
 import { AWARDS, reachableAwards, planForGoal } from "../awards.mjs";
+
+// Award-seat availability is gated (seats.aero bars commercial API use), so we optimise
+// VALUE and link users out to check seats — routing around the hard data layer.
+const SEAT_SEARCH = {
+  "Singapore KrisFlyer": "https://seats.aero/singapore",
+  "Air India Maharaja Club": "https://www.airindia.com/in/en/maharaja-club.html",
+  "Air France-KLM Flying Blue": "https://seats.aero/search",
+};
+const seatLink = (program) => SEAT_SEARCH[program] || "https://seats.aero/search";
 import { parseSMS, parseCSV } from "../ingestion.mjs";
 import { parseQuery } from "../query.mjs";
 import { planAllocation } from "../planner.mjs";
@@ -521,7 +530,8 @@ function redeemUI() {
         (reach.length
           ? reach.map((g) => `<div class="bd">${g.award.kind === "hotel" ? "🏨" : "✈️"} ${g.award.name} via ${g.program}${g.count > 1 ? ` ×${g.count}` : ""} <span class="meta">— worth ~${rupee(g.award.cashINR * g.count)}</span></div>`).join("")
           : `<div class="bd meta">Not enough for a full award yet — keep earning.</div>`) +
-        (near ? `<div class="bd meta">Almost: ${near.gap.toLocaleString("en-IN")} more ${near.program} miles → ${near.award.name}</div>` : "");
+        (near ? `<div class="bd meta">Almost: ${near.gap.toLocaleString("en-IN")} more ${near.program} miles → ${near.award.name}</div>` : "") +
+        (reach[0] ? `<div class="hint" style="margin-top:4px"><a href="${seatLink(reach[0].program)}" target="_blank" rel="noopener">Check ${reach[0].program} award seats ↗</a></div>` : "");
 
       return `<div class="panel">
         <h2>${byId[id].name} — ${bal.toLocaleString("en-IN")} ${plan.name}</h2>
@@ -543,6 +553,7 @@ function redeemUI() {
         <div>Spread to capture<br><span class="total leak">${rupee(spread)}</span></div>
       </div>
       <div class="hint" style="margin-top:6px">Same points — up to ${rupee(spread)} more value depending on <i>how</i> you burn them. Transfer to airline/hotel partners beats cashback.</div>
+      <div class="hint">We rank by <b>value</b>, not live seat availability — confirm award seats before transferring. <span class="meta">Transfer data verified ${DATA_VERIFIED}.</span></div>
     </div>
     <div class="panel"><h2>🎯 Path to a goal</h2>
       <label>Pick a target award</label>
@@ -569,7 +580,7 @@ function goalAnalyse() {
       <div class="card best"><div class="bd">Fastest route: put spend on <b>${plan.best.cardName}</b> → earns ~${plan.best.milesPer100.toFixed(1)} ${award.program} miles per ₹100 (via ${plan.best.ratio} transfer).</div>
         <div class="bd ok">Spend <b>${rupee(plan.spendNeeded)}</b> more to unlock it${months ? ` — ≈ <b>${months} month${months > 1 ? "s" : ""}</b> at your ~${rupee(monthly)}/mo` : ""}. Award worth ~${rupee(award.cashINR)}.</div></div>`;
   }
-  el("goal-out").innerHTML = body;
+  el("goal-out").innerHTML = body + `<div class="hint" style="margin-top:8px">Award seats are limited and not guaranteed — <a href="${seatLink(award.program)}" target="_blank" rel="noopener">check ${award.program} availability ↗</a> before you transfer.</div>`;
 }
 
 // ---------- Coach ----------

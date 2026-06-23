@@ -1,5 +1,8 @@
 // ₹/point valuation engine — the single most important number in the system.
-// Values researched June 2026 (cardexpert, technofino, milesahead, magnify, cardmaven).
+// Transfer-partner ratios verified against issuer + airline primary sources, June 2026
+// (axis.bank.in/miles-transfer, americanexpress.com/en-in, Air India per-bank pages),
+// cross-checked vs pointsmath/milesahead/magnify. India ratios change often — re-verify.
+export const DATA_VERIFIED = "June 2026";
 // Three modes:
 //   best     = engaged optimizer, ideal redemption (e.g. 1:2 airline transfer)
 //   typical  = realistic engaged user (portal travel / modest transfer)  [DEFAULT]
