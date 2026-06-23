@@ -25,6 +25,9 @@ const BRAND = { "hdfc-infinia": "#004C8F", "axis-atlas": "#97144D", "amazon-pay-
 const initials = (name) => (name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 const cardChip = (id) => byId[id] ? `<span class="chip" style="background:${BRAND[id] || "#5b6472"}">${initials(byId[id].name)}</span>` : "";
 
+// Operator-only data-platform tooling — hidden from end users. Enable with ?dev=1.
+const DEV = new URLSearchParams(location.search).has("dev") || localStorage.getItem("cardiq-dev") === "1";
+
 // Pull catalog + (already-resolved) offers from the data platform; fall back silently.
 async function syncFromPlatform(opts = {}) {
   try {
@@ -784,7 +787,7 @@ function cardsUI() {
       </div>
       <div class="hint" style="margin-top:8px">Your selection, imported transactions and plan are saved on this device.</div>
     </div>
-    <div class="panel"><h2>🛰 Data platform</h2><div id="platform-panel"><div class="bd meta">Checking…</div></div></div>`;
+    ${DEV ? `<div class="panel"><h2>🛰 Data platform <span class="meta">(operator view)</span></h2><div id="platform-panel"><div class="bd meta">Checking…</div></div></div>` : ""}`;
   el("card-list").querySelectorAll("input[data-id]").forEach((inp) =>
     inp.addEventListener("change", () => {
       const s = new Set(store.get("selectedCards"));
@@ -798,7 +801,7 @@ function cardsUI() {
     el("mode").value = mode();
     cardsUI();
   });
-  renderPlatform();
+  if (DEV) renderPlatform();
 }
 
 async function renderPlatform() {
