@@ -19,7 +19,7 @@ const DEFAULT_MONTHLY = { grocery: 8000, dining: 5000, travel: 10000, electronic
 const seedProfile = () => ({ selectedCards: [...seed.cards], ledger: [...seed.ledger], planRows: structuredClone(DEFAULT_PLAN), spendToDate: { ...seed.spendToDate }, monthlySpend: { ...DEFAULT_MONTHLY }, pointsBalance: { ...seed.pointsBalance }, expiring: structuredClone(seed.expiring ?? []) });
 const blankProfile = () => ({ selectedCards: [...seed.cards], ledger: [], planRows: structuredClone(DEFAULT_PLAN), spendToDate: {}, monthlySpend: { ...DEFAULT_MONTHLY }, pointsBalance: {}, expiring: [] });
 
-const defaults = () => ({ mode: "typical", activeProfile: "You", profiles: { You: seedProfile() } });
+const defaults = () => ({ mode: "typical", theme: "light", activeProfile: "You", profiles: { You: seedProfile() } });
 
 function load() {
   try {

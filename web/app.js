@@ -96,6 +96,19 @@ function switchTab(name) {
 document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => switchTab(t.dataset.tab)));
 el("nav-cards").addEventListener("click", () => switchTab("cards"));
 
+// ---------- light / dark theme ----------
+function applyTheme() {
+  const dark = store.get("theme") === "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "";
+  const btn = el("theme-toggle");
+  if (btn) btn.textContent = dark ? "☀️" : "🌙";
+}
+el("theme-toggle").addEventListener("click", () => {
+  store.set("theme", store.get("theme") === "dark" ? "light" : "dark");
+  applyTheme();
+});
+applyTheme();
+
 // header valuation mode
 el("mode").value = mode();
 el("mode").addEventListener("change", (e) => {
@@ -821,39 +834,56 @@ function gcAnalyse() {
 }
 
 // ---------- Cards (ownership) ----------
+function setMembership(id, inWallet) {
+  const s = new Set(store.get("selectedCards"));
+  inWallet ? s.add(id) : s.delete(id);
+  store.set("selectedCards", [...s]);
+  cardsUI(); // re-render; every other tab recomputes from the store when opened
+}
 function cardsUI() {
   const sel = new Set(store.get("selectedCards"));
+  const have = cards.filter((c) => sel.has(c.id));
+  const avail = cards.filter((c) => !sel.has(c.id));
+  const tile = (c, inWallet) => `<div class="card-tile" draggable="true" data-id="${c.id}">
+      ${cardChip(c.id)}
+      <div><div class="t-name">${c.name}</div><div class="t-meta">${c.issuer} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</div></div>
+      <span class="t-move" title="${inWallet ? "remove" : "add"}">${inWallet ? "×" : "+"}</span>
+    </div>`;
+
   el("cards").innerHTML = `
-    <div class="panel"><h2>Which cards do you hold?</h2>
-      <div class="hint">Tick the cards you own — every other tab works off this list.</div>
-      <div id="card-list" style="margin-top:12px">${cards
-        .map(
-          (c) => `<label class="card" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:11px">
-            <span style="display:flex; align-items:center; gap:11px">${cardChip(c.id)}<span><b>${c.name}</b> <span class="meta">${c.issuer} · ${c.network} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</span></span></span>
-            <input type="checkbox" data-id="${c.id}" ${sel.has(c.id) ? "checked" : ""} style="width:auto" />
-          </label>`
-        )
-        .join("")}</div>
-      <div style="margin-top:14px; display:flex; gap:8px">
+    <div class="panel"><h2>Your cards</h2>
+      <div class="bd" style="margin-bottom:14px">Drag a card between the lists — or just tap it — to add or remove it. Every calculation updates instantly.</div>
+      <div class="dz-wrap">
+        <div class="dz" id="dz-have" data-zone="have"><h3>💳 In your wallet (${have.length})</h3><div id="have-list">${have.map((c) => tile(c, true)).join("") || '<div class="bd meta">Drag or tap cards from the right →</div>'}</div></div>
+        <div class="dz" id="dz-avail" data-zone="avail"><h3>＋ Available cards (${avail.length})</h3><div id="avail-list">${avail.map((c) => tile(c, false)).join("") || '<div class="bd meta">You hold every card we track 🎉</div>'}</div></div>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:8px">
         <button class="go" id="card-done">Done</button>
         <button class="go" id="card-reset" style="background:var(--panel2); color:var(--bad); border:1px solid var(--line)">Reset all data</button>
       </div>
-      <div class="hint" style="margin-top:8px">Your selection, imported transactions and plan are saved on this device.</div>
+      <div class="hint" style="margin-top:8px">Saved on this device.</div>
     </div>
     ${DEV ? `<div class="panel"><h2>🛰 Data platform <span class="meta">(operator view)</span></h2><div id="platform-panel"><div class="bd meta">Checking…</div></div></div>` : ""}`;
-  el("card-list").querySelectorAll("input[data-id]").forEach((inp) =>
-    inp.addEventListener("change", () => {
-      const s = new Set(store.get("selectedCards"));
-      inp.checked ? s.add(inp.dataset.id) : s.delete(inp.dataset.id);
-      store.set("selectedCards", [...s]);
-    })
-  );
-  el("card-done").addEventListener("click", () => switchTab("recommend"));
-  el("card-reset").addEventListener("click", () => {
-    store.reset();
-    el("mode").value = mode();
-    cardsUI();
+
+  // tap to toggle + drag handlers
+  el("cards").querySelectorAll(".card-tile").forEach((t) => {
+    t.addEventListener("click", () => setMembership(t.dataset.id, !new Set(store.get("selectedCards")).has(t.dataset.id)));
+    t.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", t.dataset.id); t.classList.add("dragging"); });
+    t.addEventListener("dragend", () => t.classList.remove("dragging"));
   });
+  ["dz-have", "dz-avail"].forEach((zid) => {
+    const z = el(zid);
+    z.addEventListener("dragover", (e) => { e.preventDefault(); z.classList.add("over"); });
+    z.addEventListener("dragleave", () => z.classList.remove("over"));
+    z.addEventListener("drop", (e) => {
+      e.preventDefault();
+      z.classList.remove("over");
+      const id = e.dataTransfer.getData("text/plain");
+      if (id) setMembership(id, z.dataset.zone === "have");
+    });
+  });
+  el("card-done").addEventListener("click", () => switchTab("recommend"));
+  el("card-reset").addEventListener("click", () => { store.reset(); el("mode").value = mode(); applyTheme(); cardsUI(); });
   if (DEV) renderPlatform();
 }
 
