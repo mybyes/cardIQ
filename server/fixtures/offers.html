@@ -1,0 +1,15 @@
+<!-- Sample "public offers page" used to demonstrate the scrape→parse→resolve
+     pipeline deterministically. Includes an EXPIRED offer (filtered out) and a
+     CONFLICTING offer (scraper Croma 12% supersedes the seed Croma 10%) so the
+     offer-lifecycle layer has something real to resolve. -->
+<html><body>
+  <h1>Card offers this week</h1>
+  <table id="offers">
+    <tr data-card="hdfc-infinia" data-merchant="reliancedigital" data-pct="7" data-cap="5000" data-emi="1">Reliance Digital — 7% up to ₹5,000 on HDFC Infinia</tr>
+    <tr data-card="hdfc-infinia" data-merchant="reliancedigital" data-pct="9" data-cap="6000" data-emi="1" data-expiry="2026-05-01">EXPIRED Reliance Digital 9% (should be filtered out)</tr>
+    <tr data-card="sbi-cashback" data-merchant="amazon" data-pct="5" data-cap="2000" data-emi="0">Amazon — extra 5% up to ₹2,000 on SBI Cashback</tr>
+    <tr data-card="axis-atlas" data-merchant="makemytrip" data-pct="12" data-cap="3000" data-emi="0">MakeMyTrip — 12% up to ₹3,000 on Axis Atlas</tr>
+    <tr data-card="flipkart-axis" data-merchant="myntra" data-pct="10" data-cap="1200" data-emi="0">Myntra — 10% up to ₹1,200 on Flipkart Axis</tr>
+    <tr data-card="axis-atlas" data-merchant="croma" data-pct="12" data-cap="7000" data-emi="1" data-expiry="2026-08-31">Croma — 12% up to ₹7,000 on Axis Atlas (newer; supersedes seed 10%)</tr>
+  </table>
+</body></html>
