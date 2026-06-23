@@ -28,6 +28,9 @@ const cardChip = (id) => byId[id] ? `<span class="chip" style="background:${BRAN
 // Operator-only data-platform tooling — hidden from end users. Enable with ?dev=1.
 const DEV = new URLSearchParams(location.search).has("dev") || localStorage.getItem("cardiq-dev") === "1";
 
+// Friendly labels for the point-value mode (avoid best/typical/floor jargon in the UI).
+const MODE_LABEL = { best: "Optimistic", typical: "Realistic", floor: "Conservative" };
+
 // Pull catalog + (already-resolved) offers from the data platform; fall back silently.
 async function syncFromPlatform(opts = {}) {
   try {
@@ -311,7 +314,7 @@ function runRecommend() {
       portalTip(txn) +
       `<div class="panel">
         <h2>You don't need the final price</h2>
-        <div class="card best"><div class="top"><div class="name">Use ${res.stable.name}</div><div class="val">${res.stable.steadyPct.toFixed(1)}% <small>steady</small></div></div>
+        <div class="card best"><div class="top"><div class="name">Use ${res.stable.name}</div><div class="val">${res.stable.steadyPct.toFixed(1)}% <small>value</small></div></div>
         <div class="bd">${res.priceIndependent ? "Same best card across the whole " + rupee(lo) + "–" + rupee(hi) + " range — the % doesn't depend on the exact fare." : "The winner changes by price — see the bands below."}</div></div>
         ${res.priceIndependent ? "" : `<h2 style="margin-top:8px">Winner by price band</h2><table><tr><th>Fare</th><th>Use</th><th class="num">value</th></tr>${bands}</table>`}
       </div>`;
@@ -433,7 +436,7 @@ function walletUI() {
       const bal = U.pointsBalance?.[id];
       let html = `<div class="card"><div class="top"><div class="name" style="display:flex; align-items:center; gap:11px">${cardChip(id)}<span>${c.name}</span></div><div class="meta">${c.issuer} · ${c.network}</div></div>`;
       if (bal != null && cur !== "CASHBACK")
-        html += `<div class="bd">Balance: <b>${bal.toLocaleString("en-IN")}</b> ${currencies[cur].name} ≈ <b>${rupee(bal * valuePerUnit(cur, mode()))}</b> (${mode()})</div>`;
+        html += `<div class="bd">Balance: <b>${bal.toLocaleString("en-IN")}</b> ${currencies[cur].name} ≈ <b>${rupee(bal * valuePerUnit(cur, mode()))}</b> <span class="meta">(${MODE_LABEL[mode()]} value)</span></div>`;
       const next = (c.milestones ?? []).find((m) => spent < m.threshold);
       if (next) {
         const pct = Math.min(100, (spent / next.threshold) * 100);
@@ -478,7 +481,7 @@ function walletUI() {
     <div class="panel"><h2>₹/point valuation</h2>
       <table><tr><th>Currency</th><th class="num">best</th><th class="num">typical</th><th class="num">floor</th></tr>${valRows}</table></div>
     <div class="panel"><h2>Your cards (${U.cards.length})</h2>${cardRows}</div>
-    <div class="panel"><h2>Best card by category <span class="meta">(steady value, ₹10k, milestone excluded)</span></h2>
+    <div class="panel"><h2>Best card by category <span class="meta">(everyday value per ₹10,000)</span></h2>
       <table><tr><th>Category</th><th>Use</th><th class="num">value</th></tr>${catRows}</table></div>`;
 }
 
@@ -764,7 +767,7 @@ function gcAnalyse() {
     })
     .join("");
   el("gc-out").innerHTML = `<div class="panel"><h2>Ranked by net annual gain (extra rewards − fee)</h2>${cardRows}
-    <p class="hint">Net assumes you pay the full fee; many waive on spend (shown). Uses steady category value (ignores one-off milestones) and a representative merchant per category.</p></div>`;
+    <p class="hint">Net assumes you pay the full fee; many waive on spend (shown). Based on everyday category value (excludes one-off milestone bonuses) and a typical merchant per category.</p></div>`;
 }
 
 // ---------- Cards (ownership) ----------

@@ -143,11 +143,11 @@
         <span class="spacer"></span>
         <span id="profilebar" style="display:flex; gap:6px; align-items:center"></span>
         <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:12px">
-          valuation
-          <select id="mode" style="width:auto">
-            <option value="best">best</option>
-            <option value="typical" selected>typical</option>
-            <option value="floor">floor</option>
+          point value
+          <select id="mode" style="width:auto" title="How to value your reward points">
+            <option value="best">Optimistic</option>
+            <option value="typical" selected>Realistic</option>
+            <option value="floor">Conservative</option>
           </select>
         </label>
       </header>
@@ -173,7 +173,7 @@
       <div id="coach" hidden></div>
       <div id="getcard" hidden></div>
       <div id="cards" hidden></div>
-      <p class="disclaimer">Illustrative + researched data (2026). Verify against issuer T&Cs before financial decisions.</p>
+      <p class="disclaimer">Card terms change often — confirm current details with your issuer before deciding.</p>
     </div>
     <script type="module" src="/web/app.js"></script>
   </body>
