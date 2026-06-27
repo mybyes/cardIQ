@@ -2,12 +2,13 @@
 // Each source declares its kind + legal posture. Adding a new app = adding an adapter.
 import { getDB, tx } from "../db.mjs";
 import { parseSMS, parseCSV, parseEmail } from "../../ingestion.mjs";
-import { scrapeFixture, scrapeLive } from "./scraper.mjs";
+import { scrapeFixture, scrapeLive, fetchDirect, DIRECT_SOURCES } from "./scraper.mjs";
 
 export const SOURCES = {
   curation: { kind: "public-card-data", desc: "Manual editorial add/update of cards & offers — the primary, reliable mechanism for catalog accuracy.", legal: "OK — public product info." },
   scraper: { kind: "public-card-data", desc: "Scrape public offer pages → offers. Fixture-backed demo + best-effort live fetch.", legal: "Grey — honour robots.txt/ToS; prefer official or affiliate feeds." },
   ota: { kind: "public-offer-feed", desc: "Pull OTA card offers (MakeMyTrip, Cleartrip, Goibibo, EaseMyTrip…) from an offers feed → offers. Adapter ready; needs a feed URL (affiliate/offers API or partner feed) via payload.url or OTA_FEED_URL.", legal: "OK with an authorised affiliate/offers feed; NEVER credential-scrape or breach ToS." },
+  direct: { kind: "public-direct-fetch", desc: "Fetch a source's OWN public page directly (no aggregator) via the DIRECT_SOURCES registry — issuer offer pages, award charts, transfer pages. Public data only; robots.txt + rate-limit enforced. Fixture by default; payload.live=true to go live.", legal: "Public pages only — honour robots.txt/ToS; NEVER login-gated/credentialed data or bot-detection bypass." },
   sms: { kind: "user-consented", desc: "Parse user-pasted bank transaction SMS → transactions.", legal: "OK with user consent; data stays the user's." },
   csv: { kind: "user-consented", desc: "Parse user-uploaded statement CSV → transactions.", legal: "OK with user consent." },
   email: { kind: "user-consented", desc: "Parse FORWARDED statement/alert emails (free — no Gmail OAuth). Gmail auto-read would need a restricted-scope audit (~$15–75k).", legal: "OK with user consent (forwarded by the user)." },
@@ -60,6 +61,14 @@ export async function runSource(id, payload = {}) {
       const stamped = scraped.offers.map((o) => ({ ...o, fetchedAt: new Date().toISOString() }));
       const counts = scraped.ok ? upsertOffers(stamped) : { added: 0, updated: 0 };
       result = { ...counts, ok: scraped.ok, note: scraped.note };
+      break;
+    }
+    case "direct": {
+      // Direct-from-source fetch of a registered public page. payload.id selects the source.
+      const id = payload.id || Object.keys(DIRECT_SOURCES)[0];
+      const r = await fetchDirect(id, { live: !!payload.live });
+      const counts = r.ok && r.kind === "offers" ? upsertOffers(r.records) : { added: 0, updated: 0 };
+      result = { ...counts, ok: r.ok, source: id, note: r.note };
       break;
     }
     case "ota": {

@@ -98,6 +98,31 @@ export async function fetchData(payload) {
 
 ---
 
+## Direct-from-source fetching (no aggregators)
+
+Pull each issuer/airline/OTA's **own public pages** instead of an aggregator. Right tool for
+the no-API data (card rules, ratios, offers, award charts). Implemented in
+[server/sources/scraper.mjs](server/sources/scraper.mjs) as `DIRECT_SOURCES` + `fetchDirect()`,
+exposed as the `direct` source.
+
+**Hard boundary:** PUBLIC pages only. **Never** login-gated data (points balances, statements) —
+that needs credentials, which is forbidden (RBI/DPDP/ToS). Never bypass bot-detection. Points
+balances stay user-import / Account Aggregator.
+
+**Built-in guardrails:**
+- Identified User-Agent (`CardIQBot`, contact URL) — honest, not spoofed.
+- **robots.txt gate** (fail-closed) + **per-host rate-limit** (4s).
+- Per-source `parse()` + provenance stamp (`source: "direct:<id>"`, `fetchedAt`, `confidence: "scraped"`).
+- **Fixture by default** — `payload.live=true` to actually hit the site, so dev never hammers third parties.
+
+**Production realities to accept before relying on it:**
+- Bank/OTA pages mostly **block server bots** (Cloudflare/JS) → real use needs a **headless browser + rotating proxies** + per-source upkeep. No SLA; treat as best-effort.
+- ToS/legal grey → get counsel comfort; keep the curated DB as the source of truth and use direct-fetch to *flag changes for review*, not to silently overwrite.
+- Selectors break → pair every source with **change-detection** so a broken parser is caught, not trusted.
+
+Best pattern: **direct-fetch → diff vs current → human-verify high-stakes → publish.** Authentic
+(straight from the issuer) without betting users' decisions on a brittle scrape.
+
 ## Recommended first move
 **Phase 1 (offers via a coupon API)** — it's the only domain that is genuinely real-time-able from a public, compliant source, it's the user-visible "live offers" you asked for, and the same account monetises via affiliate. Everything else is either slow-changing (curate) or needs a partner/licence (AA, seats.aero).
 
