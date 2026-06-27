@@ -160,11 +160,40 @@
       .fcols .lede2 { color: var(--muted); font-size: 14px; max-width: 260px; }
       .fbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 
+      /* about */
+      .abt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 30px; }
+      .ab { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--sh); }
+      .ab .ab-ic { width: 40px; height: 40px; border-radius: 11px; background: rgba(168,130,46,.12); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+      .ab .ab-ic svg { width: 21px; height: 21px; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .ab h3 { font: 500 19px var(--serif); margin-bottom: 6px; }
+      .ab p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+      /* faq */
+      .faq { margin-top: 26px; max-width: 760px; }
+      .faq details { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 0 18px; margin-bottom: 12px; box-shadow: var(--sh); }
+      .faq summary { cursor: pointer; list-style: none; padding: 16px 0; font: 600 15.5px Inter; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .faq summary::-webkit-details-marker { display: none; }
+      .faq summary::after { content: "+"; color: var(--gold); font: 400 24px Inter; line-height: 1; }
+      .faq details[open] summary::after { content: "\2013"; }
+      .faq details p { color: var(--muted); font-size: 14.5px; line-height: 1.55; padding: 0 0 18px; margin: 0; }
+
+      /* contact */
+      .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; align-items: center; }
+      .cbox { display: flex; flex-direction: column; gap: 12px; }
+      .crow { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; text-decoration: none; color: var(--text); transition: border-color .15s, transform .12s; }
+      a.crow:hover { border-color: var(--gold); transform: translateY(-1px); }
+      .crow .ci { width: 40px; height: 40px; border-radius: 11px; background: rgba(168,130,46,.12); display: flex; align-items: center; justify-content: center; flex: none; }
+      .crow .ci svg { width: 20px; height: 20px; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .crow .ct { font: 600 12px Inter; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+      .crow .cs { font: 500 15px Inter; margin-top: 2px; }
+
       @media (max-width: 860px) {
         .hero { grid-template-columns: 1fr; } .art { display: none; }
         h1 { font-size: 42px; } .stats { grid-template-columns: repeat(2,1fr); }
         .steps { grid-template-columns: 1fr; } .fcols { grid-template-columns: 1fr 1fr; }
         .dash .hd .grow { margin-left: 0; } td, th { padding: 12px 18px; }
+        .abt { grid-template-columns: 1fr; } .contact { grid-template-columns: 1fr; }
+        nav .right a:not(.gbtn) { display: none; }
       }
     </style>
   </head>
@@ -173,7 +202,7 @@
     <div class="wrap">
       <nav>
         <span class="brand">Card<b>IQ</b></span>
-        <span class="right"><a href="#how">How it works</a><a href="#dash">Dashboard</a><a href="/web/index.html" id="enter-link" class="gbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a8822e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in</a></span>
+        <span class="right"><a href="#how">How it works</a><a href="#about">About</a><a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="/web/index.html" id="enter-link" class="gbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a8822e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in</a></span>
       </nav>
 
       <section class="hero">
@@ -259,18 +288,62 @@
         </div>
       </section>
 
-      <section class="final">
-        <h2>Stop leaving points on the table.</h2>
-        <p>Set up your wallet in two minutes — free.</p>
-        <a class="btn" href="/web/index.html" id="enter-link2">Build my wallet — it's free &rarr;</a>
+      <section class="section" id="about">
+        <span class="eyebrow"><span class="dot"></span>About us</span>
+        <h2 class="sec">Built for the points-rich, time-poor.</h2>
+        <p class="sec-sub" style="max-width:660px">CardIQ started with a simple frustration: Indians earn lakhs of reward points every year, then redeem them for a fraction of their worth — a ₹0.20 statement credit instead of a ₹0.80 business-class seat. We built the intelligence layer that closes that gap, so every point you earn actually takes you somewhere.</p>
+        <div class="abt">
+          <div class="ab">
+            <div class="ab-ic"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V7z"/></svg></div>
+            <h3>Independent</h3>
+            <p>We don't take deposits or issue cards. Our only job is to get you the most value per point — never to push a product.</p>
+          </div>
+          <div class="ab">
+            <div class="ab-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+            <h3>India-first</h3>
+            <p>Built around Indian cards, programs and transfer partners — HDFC, Axis, Amex, SBI and the airlines you actually fly.</p>
+          </div>
+          <div class="ab">
+            <div class="ab-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+            <h3>Private by design</h3>
+            <p>No bank logins, no card numbers, no inbox scraping. You stay in control of your data, always — aligned with India's DPDP Act.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq">
+        <span class="eyebrow"><span class="dot"></span>Good to know</span>
+        <h2 class="sec">Questions, answered.</h2>
+        <div class="faq">
+          <details><summary>Is it really free?</summary><p>Yes — building your wallet and seeing your points' ₹ value is free. We may earn a referral fee if you choose to apply for a card we suggest; that never changes the advice you see.</p></details>
+          <details><summary>Do you need my bank login or card numbers?</summary><p>Never. You tell us which cards you hold — we never ask for card numbers, CVVs or net-banking credentials. Spend tracking is optional, via forwarded statement emails or a pasted CSV.</p></details>
+          <details><summary>How accurate is the points valuation?</summary><p>We value points by the best realistic redemption path — researched transfer ratios and award sweet spots — refreshed regularly and stamped with a data date. We show best / typical / conservative so you can judge for yourself.</p></details>
+          <details><summary>Do you sell my data?</summary><p>No. We don't sell or share your personal data. CardIQ is built to comply with India's DPDP Act, and you can delete your wallet at any time.</p></details>
+          <details><summary>Which cards and programs are supported?</summary><p>Major Indian rewards cards (HDFC, Axis, Amex, SBI and more) and 16+ airline &amp; hotel transfer partners — and the list keeps growing.</p></details>
+        </div>
+      </section>
+
+      <section class="section" id="contact">
+        <div class="contact">
+          <div>
+            <span class="eyebrow"><span class="dot"></span>Contact</span>
+            <h2 class="sec">Talk to us.</h2>
+            <p class="sec-sub">Questions, feedback, or a card or program we should add? We read every message — and usually reply within a day.</p>
+          </div>
+          <div class="cbox">
+            <a class="crow" href="mailto:hello@cardiq.app"><span class="ci"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><div><div class="ct">Email us</div><div class="cs">hello@cardiq.app</div></div></a>
+            <a class="crow" href="mailto:import@cardiq.app"><span class="ci"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><div><div class="ct">Forward statements</div><div class="cs">import@cardiq.app</div></div></a>
+            <div class="crow"><span class="ci"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><div class="ct">Based in</div><div class="cs">India · built for the Indian market</div></div></div>
+          </div>
+        </div>
       </section>
 
       <footer>
         <div class="fcols">
           <div><span class="brand">Card<b>IQ</b></span><p class="lede2" style="margin-top:10px">The intelligence layer for your credit-card points. Crafted for people who travel on points.</p></div>
-          <div><h4>Product</h4><a href="/web/index.html" class="ent">Which card to use</a><a href="/web/index.html" class="ent">Points value</a><a href="/web/index.html" class="ent">Redeem & goals</a><a href="/web/index.html" class="ent">Get a card</a></div>
-          <div><h4>Tools</h4><a href="/web/index.html" class="ent">₹/point calculator</a><a href="/web/index.html" class="ent">Transfer partners</a><a href="/web/index.html" class="ent">Plan a goal</a></div>
-          <div><h4>Company</h4><a href="#how">How it works</a><a href="#dash">Dashboard</a><a href="#">Contact</a><a href="#">Privacy</a></div>
+          <div><h4>Product</h4><a href="#how">How it works</a><a href="#dash">Points value</a><a href="#dash">Redeem &amp; goals</a><a href="/web/index.html" class="ent">Open the app</a></div>
+          <div><h4>Company</h4><a href="#about">About us</a><a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="mailto:hello@cardiq.app">hello@cardiq.app</a></div>
+          <div><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Disclaimer</a><a href="#contact">Data &amp; DPDP</a></div>
         </div>
         <div class="fbar"><span>© 2026 CardIQ · Indian-market data, point-in-time.</span><span style="margin-left:auto">Verify card terms with your issuer before deciding.</span></div>
       </footer>
