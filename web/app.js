@@ -34,6 +34,54 @@ const BRAND = { "hdfc-infinia": "#004C8F", "axis-atlas": "#97144D", "amazon-pay-
 const initials = (name) => (name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 const cardChip = (id) => byId[id] ? `<span class="chip" style="background:${BRAND[id] || "#5b6472"}">${initials(byId[id].name)}</span>` : "";
 
+// Affiliate "Apply" links — the monetisation surface (card-signup commissions).
+// REPLACE these with your affiliate-tagged URLs (GroMo / Cuelinks / INRDeals / bank
+// affiliate programs). Defaults point to the official card pages so links still work.
+const AFFILIATE = {
+  "hdfc-infinia": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/infinia",
+  "axis-atlas": "https://www.axisbank.com/retail/cards/credit-card/axis-bank-atlas-credit-card",
+  "amazon-pay-icici": "https://www.icicibank.com/personal-banking/cards/credit-card/amazon-pay-credit-card",
+  "flipkart-axis": "https://www.axisbank.com/retail/cards/credit-card/flipkart-axis-bank-credit-card",
+  "sbi-cashback": "https://www.sbicard.com/en/personal/credit-cards/shopping/cashback-sbi-card.page",
+};
+const applyLink = (id) => AFFILIATE[id] || null;
+const applyBtn = (id) => (applyLink(id) ? `<a class="apply" href="${applyLink(id)}" target="_blank" rel="noopener sponsored" data-nomove>Apply ↗</a>` : "");
+
+// Premium two-stop gradients for rendered card faces.
+const CARD_GRADIENT = {
+  "hdfc-infinia": "linear-gradient(135deg,#0a2540,#05101d)",
+  "axis-atlas": "linear-gradient(135deg,#7d1638,#3f0a1c)",
+  "amazon-pay-icici": "linear-gradient(135deg,#ff9d20,#c0610a)",
+  "flipkart-axis": "linear-gradient(135deg,#2874f0,#10336e)",
+  "sbi-cashback": "linear-gradient(135deg,#2a4cae,#13245a)",
+};
+// A rendered credit-card mockup. opts.net → shows a value pill.
+function cardFace(c, opts = {}) {
+  const fee = c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "Lifetime free";
+  const netPill = opts.net != null ? `<span class="cf-net">${opts.net > 0 ? "+" : ""}${rupee(opts.net)}/yr</span>` : "";
+  return `<div class="cardface" style="background:${CARD_GRADIENT[c.id] || "linear-gradient(135deg,#3a3f4a,#1d2027)"}" data-id="${c.id}">
+      <div class="cf-row"><span>${c.issuer}</span><span>${c.network}</span></div>
+      <div class="cf-chip"></div>
+      <div class="cf-name">${c.name}</div>
+      <div class="cf-foot"><span class="cf-fee">${fee}</span>${netPill}</div>
+    </div>`;
+}
+
+// Crisp inline line-icons (currentColor) — replace inconsistent emoji.
+const ICONS = {
+  spark: '<path d="M12 3v6m0 6v6m-9-9h6m6 0h6"/><path d="M5.6 5.6l3.5 3.5m5.8 5.8l3.5 3.5m0-12.8l-3.5 3.5m-5.8 5.8l-3.5 3.5"/>',
+  chart: '<path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/>',
+  trend: '<path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-6h-6"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  plane: '<path d="M10.2 14.5L3 13l-1 2 5 3 3 5 2-1-1.5-7.2L20 8a2 2 0 10-3-3l-6.8 6.5z"/>',
+  hotel: '<path d="M3 21V8l9-5 9 5v13M3 21h18M9 21v-5h6v5"/>',
+  card: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+};
+const icon = (n) => (ICONS[n] ? `<svg class="ic" viewBox="0 0 24 24">${ICONS[n]}</svg>` : "");
+
+// Loyalty / airline-hotel program chips.
+const loyaltyChip = (p) => `<span class="loychip ${p.good === false ? "poor" : ""}">${icon(p.kind === "hotel" ? "hotel" : "plane")} ${p.program} <span class="meta">${p.ratio}</span>${p.good === false ? " ⚠️" : ""}</span>`;
+
 // Operator-only data-platform tooling — hidden from end users. Enable with ?dev=1.
 const DEV = new URLSearchParams(location.search).has("dev") || localStorage.getItem("cardiq-dev") === "1";
 
@@ -204,12 +252,17 @@ function homeUI() {
         <button class="primary" data-tab="recommend">Which card should I use?</button>
         <button class="ghost" data-tab="redeem">What are my points worth?</button>
       </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg class="route" viewBox="0 0 230 90" fill="none"><path d="M8 72 Q 96 -6 214 26" stroke="currentColor" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/><circle cx="8" cy="72" r="3.5" fill="currentColor"/><circle cx="214" cy="26" r="3.5" fill="currentColor"/></svg>
+        <div class="fc fc2"><div class="hchip"></div></div>
+        <div class="fc fc1"><div class="hchip"></div></div>
+      </div>
     </div>
 
     <div class="grid grid-3">
-      <div class="stat"><div class="l">📊 Spend tracked</div><div class="v">${rupee(total)}</div></div>
-      <div class="stat"><div class="l">✨ Rewards earned</div><div class="v ok">${rupee(rs.earned)}</div></div>
-      <div class="stat"><div class="l">📉 Left on the table</div><div class="v ${rs.leftOnTable > 0 ? "leak" : "ok"}">${rupee(rs.leftOnTable)}</div></div>
+      <div class="stat"><div class="l">${icon("chart")} Spend tracked</div><div class="v">${rupee(total)}</div></div>
+      <div class="stat"><div class="l">${icon("spark")} Rewards earned</div><div class="v ok">${rupee(rs.earned)}</div></div>
+      <div class="stat"><div class="l">${icon("trend")} Left on the table</div><div class="v ${rs.leftOnTable > 0 ? "leak" : "ok"}">${rupee(rs.leftOnTable)}</div></div>
     </div>
 
     <div class="grid grid-2">
@@ -538,10 +591,13 @@ function walletUI() {
     })
     .join("");
 
+  const faces = U.cards.map((id) => byId[id] && cardFace(byId[id])).filter(Boolean).join("");
   el("wallet").innerHTML = `
+    <div class="panel"><h2>${icon("card")} Your wallet <span class="meta">(${U.cards.length} cards)</span></h2>
+      <div class="cardgrid">${faces || '<div class="bd">No cards yet — add some in ⚙ Cards.</div>'}</div></div>
     <div class="panel"><h2>₹/point valuation</h2>
       <table><tr><th>Currency</th><th class="num">best</th><th class="num">typical</th><th class="num">floor</th></tr>${valRows}</table></div>
-    <div class="panel"><h2>Your cards (${U.cards.length})</h2>${cardRows}</div>
+    <div class="panel"><h2>Card details</h2>${cardRows}</div>
     <div class="panel"><h2>Best card by category <span class="meta">(everyday value per ₹10,000)</span></h2>
       <table><tr><th>Category</th><th>Use</th><th class="num">value</th></tr>${catRows}</table></div>`;
 }
@@ -571,7 +627,7 @@ function redeemUI() {
         .map((p, i) => `<tr><td>${p.path}</td><td class="num">₹${p.value.toFixed(2)}/pt</td><td class="num ${i === 0 ? "ok" : i === plan.paths.length - 1 ? "leak" : ""}">${rupee(p.inr)}</td></tr>`)
         .join("");
       const partners = plan.partners.length
-        ? `<div class="bd meta">Transfer partners: ${plan.partners.map((pp) => `${pp.program} <span style="opacity:.7">(${pp.ratio})</span>${pp.good === false ? " ⚠️" : ""}`).join(" · ")}</div>`
+        ? `<div class="bd" style="margin-top:6px">Transfer partners</div><div>${plan.partners.map(loyaltyChip).join("")}</div>`
         : "";
 
       // goal-based: what concrete awards these points can buy
@@ -826,6 +882,7 @@ function gcAnalyse() {
         </div>
         <div class="bd">+${rupee(r.incrementalReward)}/yr extra rewards · <span class="meta">${feeNote}</span></div>
         ${r.wins.length ? `<div class="bd meta">Wins your: ${r.wins.join(", ")}</div>` : `<div class="bd meta">Doesn't beat your current cards on this spend.</div>`}
+        <div style="margin-top:10px; display:flex; align-items:center; gap:10px">${applyBtn(r.card.id)}${good ? "" : '<span class="meta">not recommended for your spend</span>'}</div>
       </div>`;
     })
     .join("");
@@ -844,11 +901,20 @@ function cardsUI() {
   const sel = new Set(store.get("selectedCards"));
   const have = cards.filter((c) => sel.has(c.id));
   const avail = cards.filter((c) => !sel.has(c.id));
-  const tile = (c, inWallet) => `<div class="card-tile" draggable="true" data-id="${c.id}">
+  // "trying this card" preview — projected annual gain for cards you don't hold
+  const netOf = {};
+  try {
+    recommendNewCard(profileFromMonthly(store.get("monthlySpend")), appUser(), cards, offers, mode()).forEach((a) => (netOf[a.card.id] = a.net));
+  } catch {}
+  const tile = (c, inWallet) => {
+    const net = netOf[c.id];
+    const netLine = !inWallet && net != null ? `<div class="t-meta" style="margin-top:2px">${net > 0 ? `<span class="ok">+${rupee(net)}/yr if you add it</span>` : `<span class="meta">${rupee(net)}/yr on your spend</span>`}</div>` : "";
+    return `<div class="card-tile" draggable="true" data-id="${c.id}">
       ${cardChip(c.id)}
-      <div><div class="t-name">${c.name}</div><div class="t-meta">${c.issuer} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</div></div>
-      <span class="t-move" title="${inWallet ? "remove" : "add"}">${inWallet ? "×" : "+"}</span>
+      <div><div class="t-name">${c.name}</div><div class="t-meta">${c.issuer} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</div>${netLine}</div>
+      ${inWallet ? `<span class="t-move" title="remove">×</span>` : applyBtn(c.id)}
     </div>`;
+  };
 
   el("cards").innerHTML = `
     <div class="panel"><h2>Your cards</h2>
@@ -867,7 +933,10 @@ function cardsUI() {
 
   // tap to toggle + drag handlers
   el("cards").querySelectorAll(".card-tile").forEach((t) => {
-    t.addEventListener("click", () => setMembership(t.dataset.id, !new Set(store.get("selectedCards")).has(t.dataset.id)));
+    t.addEventListener("click", (e) => {
+      if (e.target.closest("[data-nomove]")) return; // Apply link — open it, don't move the card
+      setMembership(t.dataset.id, !new Set(store.get("selectedCards")).has(t.dataset.id));
+    });
     t.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", t.dataset.id); t.classList.add("dragging"); });
     t.addEventListener("dragend", () => t.classList.remove("dragging"));
   });
