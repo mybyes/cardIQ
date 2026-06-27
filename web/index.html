@@ -154,8 +154,9 @@
 
       /* ---- rendered credit-card faces (signature element) ---- */
       .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 16px; }
-      .cardface { position: relative; aspect-ratio: 1.586 / 1; border-radius: 15px; padding: 16px 18px; color: #fff; box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; isolation: isolate; transition: transform .2s; }
-      .cardface:hover { transform: translateY(-3px) scale(1.01); }
+      .cardface { position: relative; aspect-ratio: 1.586 / 1; border-radius: 15px; padding: 16px 18px; color: #fff; box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; isolation: isolate; transition: transform .14s ease-out, box-shadow .2s; will-change: transform; }
+      .cardface .cf-shine { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .2s; background: radial-gradient(220px 220px at var(--mx,50%) var(--my,0%), rgba(255,255,255,.28), transparent 60%); }
+      .cardface:hover .cf-shine { opacity: 1; }
       .cardface::before { content: ""; position: absolute; inset: 0; background: radial-gradient(130% 120% at 0% 0%, rgba(255,255,255,.22), transparent 55%); z-index: -1; }
       .cardface::after { content: ""; position: absolute; right: -38px; bottom: -52px; width: 170px; height: 170px; border-radius: 50%; background: rgba(255,255,255,.06); }
       .cf-row { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; opacity: .95; }
@@ -165,6 +166,23 @@
       .cf-foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px; }
       .cf-fee { font-size: 11.5px; opacity: .85; }
       .cf-net { font-size: 12px; font-weight: 700; background: rgba(255,255,255,.18); padding: 3px 9px; border-radius: 999px; }
+
+      /* ---- mini card faces (drag picker) ---- */
+      .minicard { width: 56px; height: 36px; border-radius: 7px; flex: none; position: relative; box-shadow: var(--shadow); overflow: hidden; }
+      .minicard::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,.25), transparent 55%); }
+      .minicard::after { content: ""; position: absolute; left: 7px; top: 11px; width: 12px; height: 9px; border-radius: 2px; background: linear-gradient(135deg, #f4dd92, #c89a3a); }
+
+      /* ---- route chip (awards) ---- */
+      .routechip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .03em; background: var(--accent-weak); color: var(--accent); margin-right: 6px; }
+      .routechip .ic { width: 12px; height: 12px; }
+
+      /* ---- entrance motion ---- */
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: no-preference) {
+        .panel, .stat, .cardface, .hero { animation: fadeUp .38s ease both; }
+        .grid-3 .stat:nth-child(2) { animation-delay: .05s; }
+        .grid-3 .stat:nth-child(3) { animation-delay: .1s; }
+      }
 
       /* ---- inline icons ---- */
       .ic { width: 1em; height: 1em; vertical-align: -.13em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }

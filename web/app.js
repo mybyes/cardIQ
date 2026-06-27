@@ -60,6 +60,7 @@ function cardFace(c, opts = {}) {
   const fee = c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "Lifetime free";
   const netPill = opts.net != null ? `<span class="cf-net">${opts.net > 0 ? "+" : ""}${rupee(opts.net)}/yr</span>` : "";
   return `<div class="cardface" style="background:${CARD_GRADIENT[c.id] || "linear-gradient(135deg,#3a3f4a,#1d2027)"}" data-id="${c.id}">
+      <span class="cf-shine"></span>
       <div class="cf-row"><span>${c.issuer}</span><span>${c.network}</span></div>
       <div class="cf-chip"></div>
       <div class="cf-name">${c.name}</div>
@@ -81,6 +82,46 @@ const icon = (n) => (ICONS[n] ? `<svg class="ic" viewBox="0 0 24 24">${ICONS[n]}
 
 // Loyalty / airline-hotel program chips.
 const loyaltyChip = (p) => `<span class="loychip ${p.good === false ? "poor" : ""}">${icon(p.kind === "hotel" ? "hotel" : "plane")} ${p.program} <span class="meta">${p.ratio}</span>${p.good === false ? " ⚠️" : ""}</span>`;
+
+// Mini card face for the drag picker — feels like dealing a real card.
+const miniCard = (id) => `<div class="minicard" style="background:${CARD_GRADIENT[id] || "linear-gradient(135deg,#3a3f4a,#1d2027)"}"></div>`;
+const routeChip = (a) => (a && a.route ? `<span class="routechip">${icon("plane")} ${a.route}</span>` : "");
+
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// 3D parallax tilt + shine that follows the cursor over card faces.
+function attachCardTilt(root) {
+  if (reduceMotion()) return;
+  root.querySelectorAll(".cardface").forEach((card) => {
+    card.addEventListener("mousemove", (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${px * 11}deg) rotateX(${-py * 11}deg) translateY(-4px)`;
+      card.style.setProperty("--mx", (px + 0.5) * 100 + "%");
+      card.style.setProperty("--my", (py + 0.5) * 100 + "%");
+    });
+    card.addEventListener("mouseleave", () => (card.style.transform = ""));
+  });
+}
+
+// Count-up animation for KPI numbers (respects reduced motion).
+function countUpAll(root) {
+  if (reduceMotion()) return;
+  root.querySelectorAll("[data-count]").forEach((node) => {
+    const target = Number(node.dataset.count);
+    if (!isFinite(target)) return;
+    const t0 = performance.now(), dur = 650;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      node.textContent = rupee(target * e);
+      if (p < 1) requestAnimationFrame(tick);
+      else node.textContent = rupee(target);
+    };
+    requestAnimationFrame(tick);
+  });
+}
 
 // Operator-only data-platform tooling — hidden from end users. Enable with ?dev=1.
 const DEV = new URLSearchParams(location.search).has("dev") || localStorage.getItem("cardiq-dev") === "1";
@@ -260,9 +301,9 @@ function homeUI() {
     </div>
 
     <div class="grid grid-3">
-      <div class="stat"><div class="l">${icon("chart")} Spend tracked</div><div class="v">${rupee(total)}</div></div>
-      <div class="stat"><div class="l">${icon("spark")} Rewards earned</div><div class="v ok">${rupee(rs.earned)}</div></div>
-      <div class="stat"><div class="l">${icon("trend")} Left on the table</div><div class="v ${rs.leftOnTable > 0 ? "leak" : "ok"}">${rupee(rs.leftOnTable)}</div></div>
+      <div class="stat"><div class="l">${icon("chart")} Spend tracked</div><div class="v" data-count="${total}">${rupee(total)}</div></div>
+      <div class="stat"><div class="l">${icon("spark")} Rewards earned</div><div class="v ok" data-count="${rs.earned}">${rupee(rs.earned)}</div></div>
+      <div class="stat"><div class="l">${icon("trend")} Left on the table</div><div class="v ${rs.leftOnTable > 0 ? "leak" : "ok"}" data-count="${rs.leftOnTable}">${rupee(rs.leftOnTable)}</div></div>
     </div>
 
     <div class="grid grid-2">
@@ -282,6 +323,7 @@ function homeUI() {
     </div>`;
 
   el("home").querySelectorAll("button[data-tab]").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+  countUpAll(el("home"));
 }
 
 
@@ -600,6 +642,7 @@ function walletUI() {
     <div class="panel"><h2>Card details</h2>${cardRows}</div>
     <div class="panel"><h2>Best card by category <span class="meta">(everyday value per ₹10,000)</span></h2>
       <table><tr><th>Category</th><th>Use</th><th class="num">value</th></tr>${catRows}</table></div>`;
+  attachCardTilt(el("wallet"));
 }
 
 // ---------- Redeem (burn optimiser) ----------
@@ -636,7 +679,7 @@ function redeemUI() {
       const near = goals.filter((g) => g.count === 0).sort((a, b) => a.gap - b.gap)[0];
       const goalHTML = `<div class="bd" style="margin-top:8px"><b>🎯 What you can actually get</b></div>` +
         (reach.length
-          ? reach.map((g) => `<div class="bd">${g.award.kind === "hotel" ? "🏨" : "✈️"} ${g.award.name} via ${g.program}${g.count > 1 ? ` ×${g.count}` : ""} <span class="meta">— worth ~${rupee(g.award.cashINR * g.count)}</span></div>`).join("")
+          ? reach.map((g) => `<div class="bd" style="display:flex; align-items:center; gap:4px; flex-wrap:wrap">${routeChip(g.award)} ${g.award.name} via ${g.program}${g.count > 1 ? ` ×${g.count}` : ""} <span class="meta">— worth ~${rupee(g.award.cashINR * g.count)}</span></div>`).join("")
           : `<div class="bd meta">Not enough for a full award yet — keep earning.</div>`) +
         (near ? `<div class="bd meta">Almost: ${near.gap.toLocaleString("en-IN")} more ${near.program} miles → ${near.award.name}</div>` : "") +
         (reach[0] ? `<div class="hint" style="margin-top:4px"><a href="${seatLink(reach[0].program)}" target="_blank" rel="noopener">Check ${reach[0].program} award seats ↗</a></div>` : "");
@@ -688,7 +731,7 @@ function goalAnalyse() {
       <div class="card best"><div class="bd">Fastest route: put spend on <b>${plan.best.cardName}</b> → earns ~${plan.best.milesPer100.toFixed(1)} ${award.program} miles per ₹100 (via ${plan.best.ratio} transfer).</div>
         <div class="bd ok">Spend <b>${rupee(plan.spendNeeded)}</b> more to unlock it${months ? ` — ≈ <b>${months} month${months > 1 ? "s" : ""}</b> at your ~${rupee(monthly)}/mo` : ""}. Award worth ~${rupee(award.cashINR)}.</div></div>`;
   }
-  el("goal-out").innerHTML = body + `<div class="hint" style="margin-top:8px">Award seats are limited and not guaranteed — <a href="${seatLink(award.program)}" target="_blank" rel="noopener">check ${award.program} availability ↗</a> before you transfer.</div>`;
+  el("goal-out").innerHTML = `<div class="bd" style="margin-bottom:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap">${routeChip(award)} <b>${award.name}</b> · ${award.program}</div>` + body + `<div class="hint" style="margin-top:8px">Award seats are limited and not guaranteed — <a href="${seatLink(award.program)}" target="_blank" rel="noopener">check ${award.program} availability ↗</a> before you transfer.</div>`;
 }
 
 // ---------- Coach ----------
@@ -910,7 +953,7 @@ function cardsUI() {
     const net = netOf[c.id];
     const netLine = !inWallet && net != null ? `<div class="t-meta" style="margin-top:2px">${net > 0 ? `<span class="ok">+${rupee(net)}/yr if you add it</span>` : `<span class="meta">${rupee(net)}/yr on your spend</span>`}</div>` : "";
     return `<div class="card-tile" draggable="true" data-id="${c.id}">
-      ${cardChip(c.id)}
+      ${miniCard(c.id)}
       <div><div class="t-name">${c.name}</div><div class="t-meta">${c.issuer} · ${c.annualFee ? "₹" + c.annualFee.toLocaleString("en-IN") + "/yr" : "lifetime free"}</div>${netLine}</div>
       ${inWallet ? `<span class="t-move" title="remove">×</span>` : applyBtn(c.id)}
     </div>`;

@@ -4,12 +4,12 @@ import { currencies } from "./valuation.mjs";
 // Illustrative, India-relevant award costs (one-way economy unless noted). Real award
 // charts are dynamic/zone-based — these are representative saver levels for planning.
 export const AWARDS = [
-  { program: "Singapore KrisFlyer", name: "Short-haul regional (Economy)", miles: 7500, cashINR: 9000, kind: "flight" },
-  { program: "Singapore KrisFlyer", name: "Delhi → Singapore (Economy)", miles: 22000, cashINR: 22000, kind: "flight" },
-  { program: "Singapore KrisFlyer", name: "Delhi → Singapore (Business)", miles: 52000, cashINR: 90000, kind: "flight" },
-  { program: "Air India Maharaja Club", name: "Domestic 1-way (Economy)", miles: 7500, cashINR: 6500, kind: "flight" },
-  { program: "Air India Maharaja Club", name: "Delhi → London (Economy)", miles: 40000, cashINR: 55000, kind: "flight" },
-  { program: "Flying Blue (AF-KLM)", name: "India → Europe (Economy, promo)", miles: 25000, cashINR: 45000, kind: "flight" },
+  { program: "Singapore KrisFlyer", name: "Short-haul regional (Economy)", route: "Regional", miles: 7500, cashINR: 9000, kind: "flight" },
+  { program: "Singapore KrisFlyer", name: "Delhi → Singapore (Economy)", route: "DEL→SIN", miles: 22000, cashINR: 22000, kind: "flight" },
+  { program: "Singapore KrisFlyer", name: "Delhi → Singapore (Business)", route: "DEL→SIN ·J", miles: 52000, cashINR: 90000, kind: "flight" },
+  { program: "Air India Maharaja Club", name: "Domestic 1-way (Economy)", route: "Domestic", miles: 7500, cashINR: 6500, kind: "flight" },
+  { program: "Air India Maharaja Club", name: "Delhi → London (Economy)", route: "DEL→LHR", miles: 40000, cashINR: 55000, kind: "flight" },
+  { program: "Flying Blue (AF-KLM)", name: "India → Europe (Economy, promo)", route: "IND→EU", miles: 25000, cashINR: 45000, kind: "flight" },
 ];
 
 // "1:2" → multiply points by 2; "2:1" → 0.5; "1:1" → 1.
