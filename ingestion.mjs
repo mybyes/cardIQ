@@ -104,6 +104,19 @@ export function parseCSV(text) {
   });
 }
 
+// Parse a bank statement / alert EMAIL (the free "forward your statements" path).
+// Strips HTML, puts each amount on its own line, then reuses the SMS extractor.
+// No Gmail OAuth / restricted-scope audit — user forwards or pastes the email.
+export function parseEmail(raw) {
+  const text = String(raw || "")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&amp;|&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\b(rs\.?|inr)/gi, "\n$1"); // one transaction per line for parseSMS
+  return parseSMS(text);
+}
+
 // ---- Account Aggregator adapter (stub) — the regulated, licensed rail ----
 // Real impl: register as an FIU, obtain user consent via an AA app, pull FI data.
 export async function fetchViaAccountAggregator(/* consentHandle */) {
