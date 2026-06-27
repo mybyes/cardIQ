@@ -2,6 +2,8 @@
 // Perks are the lesser-known benefits people forget they're paying for; offers are a
 // curated weekly highlight. Both are curated/point-in-time — confirm on the issuer site.
 
+export const PERKS_VERIFIED = "2026-06-20";
+
 // tag: short category label. Keyed by card id (see data.mjs).
 export const PERKS = {
   "hdfc-infinia": [
@@ -26,12 +28,6 @@ export const PERKS = {
   "sbi-cashback": [
     { tag: "Cashback", title: "5% online, any merchant", detail: "No merchant restriction online (capped ₹5,000/mo). Auto-credited — no points, no redemption, no thinking." },
     { tag: "Fee", title: "Fee waiver at ₹2L spend", detail: "The ₹999 annual fee is reversed on ₹2L annual spend — easy to hit if it's your default online card." },
-  ],
-  "croma-axis-appliance": [
-    { tag: "Appliances", title: "Stacks with no-cost EMI", detail: "Card discount stacks on top of Croma's brand cashbacks and no-cost EMI on electronics & appliances." },
-  ],
-  "flipkart-bigbillion": [
-    { tag: "Sales", title: "Big Billion Days early access", detail: "Card holders get early access plus an extra card discount that stacks with bank offers during the sale." },
   ],
 };
 

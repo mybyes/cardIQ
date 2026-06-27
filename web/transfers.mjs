@@ -7,6 +7,18 @@
 
 export const VERIFIED = "2026-06-20";
 
+// Official reference per source program — shown next to each route's verified date so
+// users (and we) can trace every number back to the issuer. Transparency = trust = moat.
+export const SOURCES = {
+  "HDFC Reward Points": { name: "HDFC SmartBuy", url: "https://offers.smartbuy.hdfcbank.com/" },
+  "Amex Membership Rewards": { name: "Amex Membership Rewards", url: "https://www.americanexpress.com/in/rewards/membership-rewards/" },
+  "Axis EDGE Miles": { name: "Axis EDGE / Atlas", url: "https://www.axisbank.com/retail/cards/credit-card/axis-bank-atlas-credit-card" },
+  "ICICI Reward Points": { name: "ICICI Rewards", url: "https://www.icicibank.com/personal-banking/cards/credit-card/rewards" },
+  "SBI Reward Points": { name: "SBI Card Rewards", url: "https://www.sbicard.com/en/personal/rewards.page" },
+  "Standard Chartered Rewards": { name: "StanChart Rewards", url: "https://www.sc.com/in/rewards/" },
+};
+export const sourceFor = (program) => SOURCES[program] || null;
+
 // Source card-points currencies (what you earn).
 export const PROGRAMS = [
   "HDFC Reward Points",

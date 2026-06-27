@@ -149,3 +149,14 @@ export const user = {
     { date: "2026-06-10", amount: 149, category: "entertainment", merchant: "Spotify", channel: "online", usedCard: "hdfc-infinia" },
   ],
 };
+
+// ---- Data provenance (the moat): when each card's rules were last checked + the source ----
+// Surfaced in the data-review console and next to card details. Confirm against issuer MITC.
+export const CARDS_VERIFIED = "2026-06-15";
+export const CARD_SOURCES = {
+  "hdfc-infinia": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/infinia-credit-card",
+  "axis-atlas": "https://www.axisbank.com/retail/cards/credit-card/axis-bank-atlas-credit-card",
+  "amazon-pay-icici": "https://www.icicibank.com/personal-banking/cards/credit-card/amazon-pay-credit-card",
+  "flipkart-axis": "https://www.axisbank.com/retail/cards/credit-card/flipkart-axis-bank-credit-card",
+  "sbi-cashback": "https://www.sbicard.com/en/personal/credit-cards/shopping/cashback-sbi-card.page",
+};

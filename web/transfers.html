@@ -152,12 +152,12 @@
 
       <footer>
         <span>© 2026 CardIQ · Curated, point-in-time data — confirm with your issuer.</span>
-        <span style="margin-left:auto"><a href="/web/login.html">Home</a> · <a href="/web/legal.html#disclaimer">Disclaimer</a> · <a href="/web/login.html#contact">Suggest a route</a></span>
+        <span style="margin-left:auto"><a href="/web/login.html">Home</a> · <a href="/web/review.html">Data &amp; sources</a> · <a href="/web/legal.html#disclaimer">Disclaimer</a></span>
       </footer>
     </div>
 
     <script type="module">
-      import { PROGRAMS, PARTNERS, filterRoutes, planJourney, GOALS } from "/web/transfers.mjs";
+      import { PROGRAMS, PARTNERS, filterRoutes, planJourney, GOALS, sourceFor } from "/web/transfers.mjs";
       const el = (id) => document.getElementById(id);
       const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -238,7 +238,7 @@
               <td data-l="Transfer time">${esc(r.time)}</td>
               <td data-l="Min" class="numc">${r.min ? r.min.toLocaleString("en-IN") : "—"}</td>
               <td data-l="Cap / yr" class="numc">${esc(r.cap)}</td>
-              <td data-l="Verified" class="ver">${esc(r.verified)}</td></tr>`).join("")
+              <td data-l="Verified" class="ver">${(() => { const s = sourceFor(r.from); return s ? `<a href="${s.url}" target="_blank" rel="noopener" title="Source: ${esc(s.name)}">${esc(r.verified)} ↗</a>` : esc(r.verified); })()}</td></tr>`).join("")
           : `<tr><td colspan="7" class="empty">No routes match — clear a filter.</td></tr>`;
       }
       el("f-from").addEventListener("change", (e) => { state.from = e.target.value; draw(); });
