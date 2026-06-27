@@ -80,6 +80,90 @@ export const SCENARIOS = [
       foot: "Want me to turn this into a concrete month-by-month plan?",
     }),
   },
+  {
+    id: "maldives",
+    match: ["maldives", "overwater", "luxury beach", "villa", "resort holiday"],
+    reply: () => ({
+      ai: true,
+      lead: "Maldives on points — the classic high-value redemption:",
+      blocks: [
+        { t: "✈ Getting there", b: "Direct from DEL/BOM to MLE — ~25–35k miles each way in economy. Transfer HDFC/Axis points to a partner that flies it; business pops up on a few dates." },
+        { t: "🏨 The villa", b: "Overwater villas are brutal in cash but bookable on Marriott/Accor/Hilton points — 5 nights can be worth ₹4–6L of value." },
+        { t: "💡 Timing", b: "May–Nov shoulder season needs far fewer points/nights for the same villa." },
+      ],
+      foot: "Tell me your dates and I'll pin the cheapest points combo.",
+    }),
+  },
+  {
+    id: "europe",
+    match: ["europe", "schengen", "paris", "italy", "switzerland", "spain", "amsterdam", "france"],
+    reply: () => ({
+      ai: true,
+      lead: "Europe on points — here's how I'd approach it:",
+      blocks: [
+        { t: "✈ Best-value cabin", b: "Business to Europe is ~80–95k miles via Flying Blue or Qatar Avios. Watch Flying Blue Promo Rewards — they can knock 25–50% off select cities each month." },
+        { t: "🛫 Route smart", b: "One-stop via DOH/IST/AUH usually opens more award space than nonstop — and Qsuite/Turkish business are excellent." },
+        { t: "🏨 On the ground", b: "Accor & Marriott points stretch well outside peak summer; aim for May or September." },
+      ],
+      foot: "Give me a city + month and I'll find the cheapest points path.",
+    }),
+  },
+  {
+    id: "expiring",
+    match: ["expir", "about to lapse", "lose my points", "points expiring", "running out"],
+    reply: () => ({
+      ai: true,
+      lead: "Don't let them lapse — here's the rescue order:",
+      blocks: [
+        { t: "1 · Buy time", b: "Even a tiny transfer or redemption often resets the program's expiry clock — cheapest way to save the lot." },
+        { t: "2 · Transfer, don't cash", b: "If you must move them, transfer to an airline partner (value held) rather than cashing out at ₹0.20–0.30/pt." },
+        { t: "3 · Park for a goal", b: "Move to a partner where you already have a trip in mind, so they're working toward an award." },
+      ],
+      foot: "Tell me which points and how many, and I'll give you the exact save-it move.",
+    }),
+  },
+  {
+    id: "lounge",
+    match: ["lounge", "airport lounge", "priority pass"],
+    reply: () => ({
+      ai: true,
+      lead: "Lounge access across your wallet:",
+      blocks: [
+        { t: "Unlimited", b: "HDFC Infinia gives unlimited domestic + international lounge access (you + add-on) via the Priority Pass — your default for travel days." },
+        { t: "Tiered", b: "Axis Atlas scales with tier (Silver→Gold→Platinum). Flipkart Axis gives 4 domestic visits/yr at ₹50k/quarter spend." },
+        { t: "💡 Tip", b: "Carry the Infinia for guests too — most others cap guest visits or charge per visit." },
+      ],
+      foot: "Want me to flag which card to carry for a specific trip?",
+    }),
+  },
+  {
+    id: "forex",
+    match: ["forex", "abroad", "international spend", "spending overseas", "markup", "foreign currency", "use abroad"],
+    reply: () => ({
+      ai: true,
+      lead: "Spending abroad — minimise the markup:",
+      blocks: [
+        { t: "Lowest markup", b: "HDFC Infinia at ~2% beats most premium cards (3.5%). On a ₹2L overseas trip that's ₹3,000 saved — use it as your travel card." },
+        { t: "Avoid", b: "Don't let the terminal bill you in INR (DCC) — always choose local currency to dodge a second 3–5% conversion." },
+        { t: "Rewards too", b: "Infinia still earns on forex spend, so you save on markup AND earn points." },
+      ],
+      foot: "Heading somewhere specific? I'll tell you the best card + how to pay.",
+    }),
+  },
+  {
+    id: "first-class",
+    match: ["first class", "first-class", "suites", "the residence"],
+    reply: () => ({
+      ai: true,
+      lead: "First class is the single best use of points — here's the play:",
+      blocks: [
+        { t: "Aspirational sweet spots", b: "Singapore Suites and Emirates/Etihad First run ₹4–8L in cash but ~120–150k miles. The per-point value is unmatched." },
+        { t: "Build the balance", b: "You'll need to pool: concentrate spend on one transferable currency (HDFC) rather than spreading thin." },
+        { t: "Patience pays", b: "First-class award space opens ~330 days out or last-minute — set alerts and stay flexible on dates." },
+      ],
+      foot: "Pick a route and I'll estimate the miles + how far off you are.",
+    }),
+  },
 ];
 
 // Normalise planJourney output into the concierge reply shape the UI renders.
