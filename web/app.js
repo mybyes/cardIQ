@@ -152,7 +152,7 @@ const el = (id) => document.getElementById(id);
 function isPro() { const p = store.get("plan"); return p === "pro" || p === "concierge"; }
 function isConcierge() { return store.get("plan") === "concierge"; }
 // Map the user's real held cards → the {program, card, balance} shape the planner uses.
-const PROGRAM_OF = { HDFC_RP: "HDFC Reward Points", EDGE_MILE: "Axis EDGE Miles", MR_POINT: "Amex Membership Rewards" };
+const PROGRAM_OF = { HDFC_RP: "HDFC Reward Points", EDGE_MILE: "Axis EDGE Miles", MR_POINT: "Amex Membership Rewards", ICICI_RP: "ICICI Reward Points" };
 function realWallet(U) {
   return (U.cards || [])
     .map((id) => { const c = byId[id]; const program = PROGRAM_OF[c?.reward?.currency]; const balance = U.pointsBalance?.[id] || 0; return program && balance > 0 ? { program, card: c.name, balance } : null; })

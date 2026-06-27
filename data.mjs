@@ -123,6 +123,50 @@ export const cards = [
     forexMarkupPct: 3.5,
     lounge: { domestic: "8/yr (Priority Pass)", international: "—" },
   },
+  {
+    id: "hdfc-diners-black",
+    name: "HDFC Diners Black",
+    issuer: "HDFC",
+    network: "Diners",
+    annualFee: 10000,
+    feeWaiverSpend: 500000, // ₹5L
+    reward: { currency: "HDFC_RP", base: 3.33, categories: {} }, // 5 RP / ₹150
+    portal: { name: "SmartBuy", category: "travel", rate: 16.65, monthlyBonusCapUnits: 15000 },
+    caps: {},
+    exclusions: ["rent", "fuel", "wallet", "emi", "government", "education", "tax"],
+    milestones: [{ threshold: 150000, rewardUnits: 1500, label: "quarterly ₹1.5L — ₹1,500 vouchers" }],
+    forexMarkupPct: 2.0,
+    lounge: { domestic: "unlimited", international: "unlimited" },
+  },
+  {
+    id: "amex-mrcc",
+    name: "Amex Membership Rewards Card",
+    issuer: "Amex",
+    network: "Amex",
+    annualFee: 1500,
+    feeWaiverSpend: 0,
+    reward: { currency: "MR_POINT", base: 2.0, categories: {} }, // 1 MR / ₹50
+    caps: {},
+    exclusions: ["fuel", "rent", "wallet", "insurance", "utilities", "emi", "government", "cash"],
+    // Famous for 1,000 bonus MR per 4 txns ≥ ₹1,500 — modelled here as a monthly milestone.
+    milestones: [{ threshold: 6000, rewardUnits: 1000, label: "4 txns ≥ ₹1,500 — 1,000 bonus MR" }],
+    forexMarkupPct: 3.5,
+    lounge: { domestic: "—", international: "—" },
+  },
+  {
+    id: "icici-sapphiro",
+    name: "ICICI Sapphiro",
+    issuer: "ICICI",
+    network: "Visa",
+    annualFee: 3500,
+    feeWaiverSpend: 600000, // ₹6L
+    reward: { currency: "ICICI_RP", base: 2.0, categories: {} }, // ~2 RP / ₹100 retail
+    caps: {},
+    exclusions: ["rent", "fuel", "wallet", "emi", "government", "education"],
+    milestones: [],
+    forexMarkupPct: 3.5,
+    lounge: { domestic: "limited", international: "limited" },
+  },
 ];
 
 export const offers = [
@@ -182,4 +226,7 @@ export const CARD_SOURCES = {
   "flipkart-axis": "https://www.axisbank.com/retail/cards/credit-card/flipkart-axis-bank-credit-card",
   "sbi-cashback": "https://www.sbicard.com/en/personal/credit-cards/shopping/cashback-sbi-card.page",
   "amex-plat-travel": "https://www.americanexpress.com/en-in/credit-cards/platinum-travel-credit-card/",
+  "hdfc-diners-black": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-black",
+  "amex-mrcc": "https://www.americanexpress.com/en-in/credit-cards/membership-rewards-credit-card/",
+  "icici-sapphiro": "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-credit-card",
 };

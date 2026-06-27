@@ -34,6 +34,20 @@ export const PERKS = {
     { tag: "Transfer", title: "Membership Rewards transfers", detail: "Move MR to Marriott Bonvoy 1:1 and select airlines — far better value than the rewards catalog or Pay-with-Points." },
     { tag: "Lounge", title: "Priority Pass lounge access", detail: "Complimentary domestic lounge visits via Priority Pass — keep it in your bag on travel days." },
   ],
+  "hdfc-diners-black": [
+    { tag: "Hotels", title: "SmartBuy 10X on hotels", detail: "Like Infinia, hotels earn 10X on SmartBuy — book stays there for outsized HDFC Reward Points." },
+    { tag: "Memberships", title: "Bundled lifestyle memberships", detail: "Complimentary Swiggy One, Times Prime, Amazon Prime, MMT Black & more at milestones — easily worth the fee." },
+    { tag: "Forex", title: "Low 2% forex markup", detail: "Same 2% markup as Infinia — a strong overseas card if Diners is accepted." },
+  ],
+  "amex-mrcc": [
+    { tag: "Bonus", title: "1,000 bonus MR per 4 transactions", detail: "Make 4 spends of ≥ ₹1,500 in a statement cycle for 1,000 bonus MR — the classic trick that lifts the effective rate well above base." },
+    { tag: "Transfer", title: "Same MR transfer partners", detail: "Pools into Membership Rewards — Marriott 1:1 and select airlines — at a low ₹1,500 fee." },
+  ],
+  "icici-sapphiro": [
+    { tag: "Movies", title: "Buy-one-get-one on BookMyShow", detail: "Up to 2 free movie tickets a month (capped) — a recurring perk that quietly pays for a chunk of the fee." },
+    { tag: "Dining", title: "Culinary Treats dining discounts", detail: "Up to 15% off at partner restaurants via the ICICI dining programme." },
+    { tag: "Lounge", title: "Domestic + international lounge", detail: "Complimentary lounge visits (spend-linked) at Indian and select overseas airports." },
+  ],
 };
 
 // Flatten the held cards' perks into a render-ready list.

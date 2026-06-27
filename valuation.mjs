@@ -80,6 +80,22 @@ export const currencies = {
       { program: "Air India Maharaja Club", ratio: "2:1", kind: "airline", good: false },
     ],
   },
+  ICICI_RP: {
+    name: "ICICI Reward Points",
+    best: 0.4,
+    typical: 0.25,
+    floor: 0.2,
+    paths: [
+      { path: "airline transfer (2:1), well-redeemed", value: 0.4 },
+      { path: "iShop vouchers", value: 0.25 },
+      { path: "statement credit", value: 0.2 },
+    ],
+    partners: [
+      { program: "Singapore KrisFlyer", ratio: "2:1", kind: "airline", good: false },
+      { program: "Air India Maharaja Club", ratio: "2:1", kind: "airline", good: false },
+      { program: "Marriott Bonvoy", ratio: "2.5:1", kind: "hotel", good: false },
+    ],
+  },
 };
 
 // Redemption paths for a currency, ranked best → worst, with ₹ value for a balance.
