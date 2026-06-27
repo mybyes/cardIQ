@@ -21,6 +21,7 @@ import { spendSummary, rewardsSummary, actionItems } from "../insights.mjs";
 import { detectRecurring, optimizeRecurring } from "../recurring.mjs";
 import * as store from "./store.mjs";
 import * as api from "./api.mjs";
+import { perksForCards, offerOfTheWeek } from "./perks.mjs";
 
 // Live data — defaults to bundled, swapped for platform data when the API is reachable.
 let cards = seedCards;
@@ -322,6 +323,8 @@ function homeUI() {
   const { total, byCat } = spendSummary(U.ledger);
   const rs = rewardsSummary(U, cards, offers, U.ledger, mode());
   const items = actionItems(U, cards, offers, U.ledger, new Date(), mode());
+  const deal = offerOfTheWeek();
+  const perks = perksForCards(U.cards, (id) => byId[id]?.name || id);
 
   const sevColor = (s) => (s >= 2 ? "var(--bad)" : "var(--accent)");
   const itemRows =
@@ -366,6 +369,14 @@ function homeUI() {
       </div>
     </div>
 
+    <div class="deal">
+      <div class="deal-l">
+        <span class="deal-tag">★ Offer of the week</span>
+        <div class="deal-body"><b>${deal.title}</b> — ${deal.detail}</div>
+      </div>
+      <button class="deal-cta" data-tab="${deal.tab}">${deal.cta} →</button>
+    </div>
+
     <div class="grid grid-3">
       <div class="stat"><div class="l">${icon("chart")} Spend tracked</div><div class="v" data-count="${total}">${rupee(total)}</div></div>
       <div class="stat"><div class="l">${icon("spark")} Rewards earned</div><div class="v ok" data-count="${rs.earned}">${rupee(rs.earned)}</div></div>
@@ -378,6 +389,11 @@ function homeUI() {
     </div>
 
     ${recurringPanel(U)}
+
+    ${perks.length ? `<div class="panel"><h2>🎁 Hidden perks in your wallet <span class="meta">(${perks.length})</span></h2>
+      <div class="bd" style="margin-bottom:14px">Benefits your cards already include that are easy to forget — worth using before the year ends.</div>
+      <div class="perks">${perks.map((p) => `<div class="perk"><div class="perk-top"><span class="perk-card">${p.cardName}</span><span class="perk-tag">${p.tag}</span></div><div class="perk-t">${p.title}</div><div class="perk-d">${p.detail}</div></div>`).join("")}</div>
+    </div>` : ""}
 
     <div class="panel"><h2>Quick actions</h2>
       <div style="display:flex; gap:8px; flex-wrap:wrap">

@@ -87,6 +87,24 @@
       .up-plans { display: block; margin-top: 12px; color: var(--muted); font-size: 13px; }
       .up-x { position: absolute; top: 12px; right: 14px; background: none; border: 0; font-size: 18px; color: var(--muted); cursor: pointer; line-height: 1; }
       .up-demo { margin-top: 12px; font-size: 11px; color: var(--muted); }
+
+      /* offer of the week + hidden perks */
+      .deal { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--ink); color: #efe2c2; border-radius: var(--radius); padding: 16px 20px; margin: 16px 0; box-shadow: var(--shadow-lg); }
+      :root[data-theme="dark"] .deal { background: #241d10; border: 1px solid var(--line); }
+      .deal-l { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 240px; flex-wrap: wrap; }
+      .deal-tag { font: 600 10.5px Inter; letter-spacing: .09em; text-transform: uppercase; color: #14110a; background: var(--accent); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+      .deal-body { font-size: 14px; line-height: 1.45; }
+      .deal-body b { color: #f3e7c8; }
+      .deal-cta { margin-left: auto; background: var(--accent); color: #14110a; border: 0; border-radius: 10px; padding: 10px 16px; font: 600 13.5px Inter; cursor: pointer; white-space: nowrap; }
+      .deal-cta:hover { filter: brightness(1.07); }
+      .perks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .perk { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+      .perk-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+      .perk-card { font: 600 12px Inter; color: var(--muted); }
+      .perk-tag { font: 600 9.5px Inter; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-weak); padding: 2px 8px; border-radius: 999px; margin-left: auto; }
+      .perk-t { font-weight: 600; font-size: 14.5px; margin-bottom: 3px; }
+      .perk-d { color: var(--muted); font-size: 13px; line-height: 1.5; }
+      @media (max-width: 720px) { .perks { grid-template-columns: 1fr; } }
       header { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
       header h1 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -.01em; white-space: nowrap; }
       .brand-iq { color: var(--accent); }
