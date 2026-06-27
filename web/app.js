@@ -286,7 +286,7 @@ function homeUI() {
 
   el("home").innerHTML = `
     <div class="hero">
-      <h1>Earn more. Burn smarter.</h1>
+      <h1>Earn more. <em>Burn smarter.</em></h1>
       <p>CardIQ tells you which card to swipe for every purchase — and turns your points into the most valuable flights and stays.</p>
       ${rs.leftOnTable > 0 ? `<div class="alert">💸 You left <b>${rupee(rs.leftOnTable)}</b> on the table on recent spends — let's fix that.</div>` : ""}
       <div class="cta">
