@@ -145,7 +145,10 @@ async function syncFromPlatform(opts = {}) {
   if (!opts.silent) render();
 }
 const el = (id) => document.getElementById(id);
-const mode = () => store.get("mode");
+// Plan gating: Free users are pinned to the "Realistic" (typical) valuation; Optimistic/
+// Conservative and the deeper redeem/plan tools are Pro-only.
+function isPro() { return store.get("plan") === "pro"; }
+const mode = () => (isPro() ? store.get("mode") || "typical" : "typical");
 const num = (v, fallback = 0) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : fallback);
 
 // Current user = seed data, but with the user's chosen cards / ledger / spend overlaid.
@@ -198,12 +201,29 @@ el("theme-toggle").addEventListener("click", () => {
 });
 applyTheme();
 
-// header valuation mode
-el("mode").value = mode();
+// header valuation mode (Optimistic / Conservative are Pro-only)
+function applyModeGate() {
+  const sel = el("mode");
+  if (!sel) return;
+  const pro = isPro();
+  [...sel.options].forEach((o) => {
+    const proOnly = o.value === "best" || o.value === "floor";
+    o.disabled = proOnly && !pro;
+    o.textContent = MODE_LABEL[o.value] + (proOnly && !pro ? " · Pro" : "");
+  });
+  sel.value = pro ? store.get("mode") || "typical" : "typical";
+}
 el("mode").addEventListener("change", (e) => {
-  store.set("mode", e.target.value);
+  const v = e.target.value;
+  if ((v === "best" || v === "floor") && !isPro()) {
+    e.target.value = "typical";
+    openUpgrade();
+    return;
+  }
+  store.set("mode", v);
   render();
 });
+applyModeGate();
 
 // header profile switcher (per-user: "You", "Spouse", …)
 function renderProfileBar() {
@@ -241,6 +261,52 @@ function renderProfileBar() {
     });
 }
 renderProfileBar();
+
+// ---------- Free / Pro plan gating ----------
+function openUpgrade() { el("upgrade-modal")?.classList.add("on"); }
+function closeUpgrade() { el("upgrade-modal")?.classList.remove("on"); }
+function setPlan(plan) {
+  store.set("plan", plan);
+  closeUpgrade();
+  renderPlanBar();
+  applyModeGate();
+  render();
+}
+// A locked panel shown in place of a Pro-only feature.
+function proGateHTML(o) {
+  return `<div class="panel"><div class="gate">
+    <div class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <div class="gb">${o.badge || "Pro feature"}</div>
+    <h2>${o.title}</h2>
+    <p>${o.desc}</p>
+    <ul class="glist">${o.bullets.map((b) => `<li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> <span>${b}</span></li>`).join("")}</ul>
+    <button class="up-btn">Upgrade to Pro — ₹199/mo</button>
+    <a class="seeplans" href="/web/login.html#pricing">Compare all plans →</a>
+  </div></div>`;
+}
+// Re-bind upgrade buttons after each render (panels are re-created on every render).
+function wireUpgradeButtons() {
+  document.querySelectorAll(".up-btn").forEach((b) => {
+    if (!b._wired) { b._wired = true; b.addEventListener("click", openUpgrade); }
+  });
+}
+// Header pill: current plan + upgrade (or a demo "back to Free" toggle).
+function renderPlanBar() {
+  const bar = el("planbar");
+  if (!bar) return;
+  if (isPro()) {
+    bar.innerHTML = `<span class="tag pro">★ Pro</span><button class="mng" id="plan-down" title="Demo: switch back to Free">Free</button>`;
+    el("plan-down").addEventListener("click", () => setPlan("free"));
+  } else {
+    bar.innerHTML = `<span class="tag free">Free</span><button class="up" id="plan-up">Upgrade</button>`;
+    el("plan-up").addEventListener("click", openUpgrade);
+  }
+}
+el("up-activate")?.addEventListener("click", () => setPlan("pro"));
+el("up-close")?.addEventListener("click", closeUpgrade);
+el("upgrade-modal")?.addEventListener("click", (e) => { if (e.target.id === "upgrade-modal") closeUpgrade(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeUpgrade(); });
+renderPlanBar();
 
 // ---------- empty state ----------
 function emptyState(container) {
@@ -479,6 +545,18 @@ function runRecommend() {
 
 // ---------- Plan ----------
 function planUI() {
+  if (!isPro()) {
+    el("plan").innerHTML = proGateHTML({
+      title: "Plan every spend — and every goal",
+      desc: "Pro routes your upcoming spends to the best card for each, and plans the points you need to reach a flight or hotel goal.",
+      bullets: [
+        "Route each upcoming spend to the best card",
+        "Goal planner — points needed for an award",
+        "What-if across your whole wallet",
+      ],
+    });
+    return;
+  }
   el("plan").innerHTML = `
     <div class="panel">
       <h2>📅 Plan your upcoming spends — we route each to the best card</h2>
@@ -647,6 +725,19 @@ function walletUI() {
 
 // ---------- Redeem (burn optimiser) ----------
 function redeemUI() {
+  if (!isPro()) {
+    el("redeem").innerHTML = proGateHTML({
+      title: "Redeem smarter — and book the trip",
+      desc: "CardIQ Pro finds the best transfer path for every point, surfaces flight & hotel award sweet spots, and shows you exactly where to book.",
+      bullets: [
+        "<b>Smart redemption optimiser</b> — the best ₹/point path, every time",
+        "<b>Flight &amp; hotel award finder</b> — sweet spots + where to book",
+        "Goal planner — reach a specific flight or hotel award",
+        "Transfer-bonus &amp; expiry alerts before you lose value",
+      ],
+    });
+    return;
+  }
   const U = appUser();
   const holdings = U.cards
     .map((id) => ({ id, bal: U.pointsBalance?.[id] }))
@@ -955,6 +1046,7 @@ function gcAnalyse() {
 // ---------- Cards (ownership) ----------
 function setMembership(id, inWallet) {
   const s = new Set(store.get("selectedCards"));
+  if (inWallet && !s.has(id) && !isPro() && s.size >= 3) { openUpgrade(); return; } // Free: up to 3 cards
   inWallet ? s.add(id) : s.delete(id);
   store.set("selectedCards", [...s]);
   cardsUI(); // re-render; every other tab recomputes from the store when opened
@@ -989,7 +1081,7 @@ function cardsUI() {
         <button class="go" id="card-done">Done</button>
         <button class="go" id="card-reset" style="background:var(--panel2); color:var(--bad); border:1px solid var(--line)">Reset all data</button>
       </div>
-      <div class="hint" style="margin-top:8px">Saved on this device.</div>
+      <div class="hint" style="margin-top:8px">Saved on this device.${!isPro() ? ` · Free plan covers up to <b>3 cards</b>. <a href="#" id="cards-up" style="color:var(--accent)">Upgrade for unlimited →</a>` : ""}</div>
     </div>
     ${DEV ? `<div class="panel"><h2>🛰 Data platform <span class="meta">(operator view)</span></h2><div id="platform-panel"><div class="bd meta">Checking…</div></div></div>` : ""}`;
 
@@ -1014,7 +1106,8 @@ function cardsUI() {
     });
   });
   el("card-done").addEventListener("click", () => switchTab("recommend"));
-  el("card-reset").addEventListener("click", () => { store.reset(); el("mode").value = mode(); applyTheme(); cardsUI(); });
+  el("card-reset").addEventListener("click", () => { store.reset(); el("mode").value = mode(); applyTheme(); renderPlanBar(); applyModeGate(); cardsUI(); });
+  el("cards-up")?.addEventListener("click", (e) => { e.preventDefault(); openUpgrade(); });
   if (DEV) renderPlatform();
 }
 
@@ -1066,6 +1159,7 @@ function render() {
     const b = el("err-reset");
     if (b) b.addEventListener("click", () => { store.reset(); location.reload(); });
   }
+  wireUpgradeButtons();
 }
 render();
 
