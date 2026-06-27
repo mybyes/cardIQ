@@ -53,6 +53,16 @@
       .gbtn.wide { padding: 13px 22px; font-size: 15px; }
       .orline { display: flex; align-items: center; gap: 12px; max-width: 440px; margin: 16px 0; color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
       .orline span { height: 1px; flex: 1; background: var(--line); }
+      .freeconfirm { display: none; max-width: 440px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px 18px; box-shadow: var(--sh); margin-top: 14px; animation: pop .22s ease; }
+      .freeconfirm.on { display: block; }
+      .freeconfirm .fc-row { display: flex; gap: 12px; align-items: flex-start; }
+      .freeconfirm .fc-ic { width: 36px; height: 36px; border-radius: 10px; background: rgba(47,107,79,.1); display: flex; align-items: center; justify-content: center; flex: none; }
+      .freeconfirm .fc-ic svg { width: 19px; height: 19px; }
+      .freeconfirm .fc-t { font: 600 15px Inter; }
+      .freeconfirm .fc-s { color: var(--muted); font-size: 13.5px; margin-top: 3px; line-height: 1.45; }
+      .freeconfirm .btn { margin-top: 14px; width: 100%; justify-content: center; }
+      .freeconfirm .fc-other { display: block; margin: 10px auto 0; background: none; border: 0; color: var(--muted); font: 600 13px Inter; cursor: pointer; }
+      .freeconfirm .fc-other:hover { color: var(--text); }
 
       .sheet-bg { position: fixed; inset: 0; background: rgba(20,14,6,.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 60; padding: 20px; }
       .sheet-bg.on { display: flex; }
@@ -172,11 +182,16 @@
           <h1>Your points were never meant <em>to sit idle.</em></h1>
           <p class="lede">They were meant to take you somewhere. CardIQ tells you which card to swipe, what your points are truly worth, and how to turn them into the best flights and stays.</p>
           <form id="signin">
-            <input type="email" id="email" placeholder="you@email.com" autocomplete="email" />
-            <button class="btn" type="submit">Start free</button>
+            <input type="email" id="email" placeholder="you@email.com" autocomplete="email" required />
+            <button class="btn" type="submit">Build my wallet &rarr;</button>
           </form>
-          <div class="micro"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Free to start · no card details, no bank login required.</div>
-          <div class="orline"><span></span>or<span></span></div>
+          <div class="micro" id="freemicro"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Free to start · no card details, no bank login required.</div>
+          <div class="freeconfirm" id="freeconfirm">
+            <div class="fc-row"><span class="fc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6b4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><div><div class="fc-t">Secure sign-in link sent</div><div class="fc-s">We emailed a one-tap link to <b id="fc-email">you@email.com</b> — no password to remember.</div></div></div>
+            <button class="btn" id="fc-open" type="button">Open my wallet &rarr;</button>
+            <button class="fc-other" id="fc-other" type="button">Use a different email</button>
+          </div>
+          <div class="orline" id="freeor"><span></span>or<span></span></div>
           <a href="/web/index.html" id="google-hero" class="gbtn wide"><svg width="17" height="17" viewBox="0 0 24 24" fill="#a8822e"><path d="M12 2.5l1.9 5.8a3 3 0 0 0 1.9 1.9l5.7 1.8-5.7 1.8a3 3 0 0 0-1.9 1.9L12 21.5l-1.9-5.8a3 3 0 0 0-1.9-1.9L2.5 12l5.7-1.8a3 3 0 0 0 1.9-1.9z"/></svg> See my points in &#8377;</a>
         </div>
         <div class="art" aria-hidden="true">
@@ -247,7 +262,7 @@
       <section class="final">
         <h2>Stop leaving points on the table.</h2>
         <p>Set up your wallet in two minutes — free.</p>
-        <a class="btn" href="/web/index.html" id="enter-link2">Start free →</a>
+        <a class="btn" href="/web/index.html" id="enter-link2">Build my wallet — it's free &rarr;</a>
       </section>
 
       <footer>
@@ -324,10 +339,31 @@
       sheet.addEventListener("click", function (e) { if (e.target === sheet) closeSheet(); });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
 
-      // Free email path + footer links keep the no-login flow.
-      document.getElementById("signin").addEventListener("submit", function (e) { e.preventDefault(); finishSignIn(null); });
-      ["enter-link2", "opp"].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener("click", function (e) { e.preventDefault(); finishSignIn(null); }); });
-      document.querySelectorAll("a.ent").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); finishSignIn(null); }); });
+      // Free path = passwordless email sign-in (magic link), not an instant redirect.
+      var freeEls = ["signin", "freemicro", "freeor", "google-hero"].map(function (id) { return document.getElementById(id); });
+      function showFreeConfirm(email) {
+        document.getElementById("fc-email").textContent = email;
+        freeEls.forEach(function (e) { if (e) e.style.display = "none"; });
+        document.getElementById("freeconfirm").classList.add("on");
+      }
+      function resetFree() {
+        document.getElementById("freeconfirm").classList.remove("on");
+        freeEls.forEach(function (e) { if (e) e.style.display = ""; });
+        document.getElementById("email").focus();
+      }
+      document.getElementById("signin").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var em = document.getElementById("email").value.trim();
+        if (!em) return;
+        showFreeConfirm(em);
+      });
+      document.getElementById("fc-open").addEventListener("click", function () { var em = document.getElementById("fc-email").textContent; finishSignIn({ name: em.split("@")[0], email: em }); });
+      document.getElementById("fc-other").addEventListener("click", resetFree);
+
+      // Other CTAs bring you to the sign-up form — never an instant entry without login.
+      function goSignup() { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(function () { var el = document.getElementById("email"); if (el) el.focus(); }, 420); }
+      ["enter-link2", "opp"].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener("click", function (e) { e.preventDefault(); goSignup(); }); });
+      document.querySelectorAll("a.ent").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); goSignup(); }); });
     </script>
   </body>
 </html>
