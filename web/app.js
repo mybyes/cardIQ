@@ -12,7 +12,7 @@ const SEAT_SEARCH = {
   "Air France-KLM Flying Blue": "https://seats.aero/search",
 };
 const seatLink = (program) => SEAT_SEARCH[program] || "https://seats.aero/search";
-import { parseSMS, parseCSV } from "../ingestion.mjs";
+import { parseSMS, parseCSV, parseEmail } from "../ingestion.mjs";
 import { parseQuery } from "../query.mjs";
 import { planAllocation } from "../planner.mjs";
 import { analyzeRange, isTravelOTA } from "../range.mjs";
@@ -753,6 +753,11 @@ function coachUI() {
       <div class="hint">Columns: <code>date, amount, merchant</code> (category & channel optional). <a id="c-csv-sample" href="#">Download sample</a></div>
       <div id="c-csv-status" class="hint"></div>
     </div>
+    <div class="panel"><h2>Forward a statement email</h2>
+      <div class="bd">Forward your bank statement & alert emails to <code>import@cardiq.app</code> and we read them automatically — no Gmail login, no passwords. Or paste one below.</div>
+      <textarea id="c-email" placeholder="Paste a bank statement or transaction-alert email here…" style="margin-top:10px"></textarea>
+      <div style="margin-top:10px; display:flex; gap:8px; align-items:center"><button class="go" id="c-email-import">Read email</button><span id="c-email-status" class="meta"></span></div>
+    </div>
     <div id="c-out"></div>`;
   el("c-import").addEventListener("click", () => {
     const U = appUser();
@@ -767,6 +772,20 @@ function coachUI() {
   });
   el("c-clear").addEventListener("click", () => {
     store.set("ledger", []);
+    coachAnalyse();
+  });
+
+  // Email statement / alert parse (free path — no Gmail OAuth).
+  el("c-email-import").addEventListener("click", () => {
+    const U = appUser();
+    const parsed = parseEmail(el("c-email").value).filter((t) => t.amount > 0 && (!t.usedCard || U.cards.includes(t.usedCard)));
+    if (!parsed.length) {
+      el("c-email-status").innerHTML = `<span class="warn">No transactions found in that email — paste the part with amounts & merchants.</span>`;
+      return;
+    }
+    store.update("ledger", (l) => [...l, ...parsed]);
+    el("c-email").value = "";
+    el("c-email-status").innerHTML = `<span class="ok">Read ${parsed.length} transactions from the email.</span>`;
     coachAnalyse();
   });
 

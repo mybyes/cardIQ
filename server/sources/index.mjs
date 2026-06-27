@@ -1,7 +1,7 @@
 // Source-adapter registry — THE mechanism to add real-world values.
 // Each source declares its kind + legal posture. Adding a new app = adding an adapter.
 import { getDB, tx } from "../db.mjs";
-import { parseSMS, parseCSV } from "../../ingestion.mjs";
+import { parseSMS, parseCSV, parseEmail } from "../../ingestion.mjs";
 import { scrapeFixture, scrapeLive } from "./scraper.mjs";
 
 export const SOURCES = {
@@ -9,7 +9,7 @@ export const SOURCES = {
   scraper: { kind: "public-card-data", desc: "Scrape public offer pages → offers. Fixture-backed demo + best-effort live fetch.", legal: "Grey — honour robots.txt/ToS; prefer official or affiliate feeds." },
   sms: { kind: "user-consented", desc: "Parse user-pasted bank transaction SMS → transactions.", legal: "OK with user consent; data stays the user's." },
   csv: { kind: "user-consented", desc: "Parse user-uploaded statement CSV → transactions.", legal: "OK with user consent." },
-  email: { kind: "user-consented", desc: "[stub] Gmail API parse of statement/alert emails.", legal: "Needs OAuth + Google restricted-scope security audit (~$15–75k)." },
+  email: { kind: "user-consented", desc: "Parse FORWARDED statement/alert emails (free — no Gmail OAuth). Gmail auto-read would need a restricted-scope audit (~$15–75k).", legal: "OK with user consent (forwarded by the user)." },
   aa: { kind: "regulated", desc: "[stub] Account Aggregator pull of consented financial data.", legal: "Needs FIU registration + Sahamati onboarding (the sanctioned rail)." },
   portal_credentials: { kind: "FORBIDDEN", desc: "Logging into a user's bank portal with their credentials.", legal: "NEVER — ToS violation, RBI/DPDP breach, credential-theft risk. Not implemented by design." },
 };
@@ -62,18 +62,18 @@ export async function runSource(id, payload = {}) {
       break;
     }
     case "sms":
-    case "csv": {
+    case "csv":
+    case "email": {
       const userId = payload.user || "demo";
       const held = new Set(getDB().users[userId]?.selectedCards ?? []);
-      const parsed = (id === "sms" ? parseSMS(payload.text || "") : parseCSV(payload.text || ""))
-        .filter((t) => t.amount > 0 && (!t.usedCard || held.has(t.usedCard)));
+      const fn = id === "sms" ? parseSMS : id === "csv" ? parseCSV : parseEmail;
+      const parsed = fn(payload.text || "").filter((t) => t.amount > 0 && (!t.usedCard || held.has(t.usedCard)));
       tx((d) => d.transactions.push(...parsed.map((t) => ({ ...t, userId, source: id }))));
       result = { imported: parsed.length, transactions: parsed };
       break;
     }
-    case "email":
     case "aa":
-      result = { error: `${id} not implemented`, note: SOURCES[id].legal };
+      result = { error: "aa not implemented", note: SOURCES.aa.legal };
       break;
     case "portal_credentials":
       result = { error: "refused by design", note: SOURCES[id].legal };
