@@ -101,6 +101,28 @@ export const cards = [
     forexMarkupPct: 3.5,
     milestones: [],
   },
+  {
+    id: "amex-plat-travel",
+    name: "Amex Platinum Travel",
+    issuer: "Amex",
+    network: "Amex",
+    annualFee: 5000,
+    feeWaiverSpend: 0, // value comes from milestone vouchers, not a spend-based fee waiver
+    reward: {
+      currency: "MR_POINT",
+      base: 2.0, // 1 Membership Reward / ₹50 = ~2 MR per ₹100
+      categories: {},
+    },
+    // Amex's edge isn't a SmartBuy-style multiplier — it's milestone vouchers + MR transfers.
+    caps: {},
+    exclusions: ["fuel", "rent", "wallet", "insurance", "utilities", "emi", "government", "cash"],
+    milestones: [
+      { threshold: 190000, rewardUnits: 15000, label: "₹1.9L — 15k bonus MR + Taj voucher" },
+      { threshold: 400000, rewardUnits: 25000, label: "₹4L — 25k bonus MR + Taj stay voucher" },
+    ],
+    forexMarkupPct: 3.5,
+    lounge: { domestic: "8/yr (Priority Pass)", international: "—" },
+  },
 ];
 
 export const offers = [
@@ -159,4 +181,5 @@ export const CARD_SOURCES = {
   "amazon-pay-icici": "https://www.icicibank.com/personal-banking/cards/credit-card/amazon-pay-credit-card",
   "flipkart-axis": "https://www.axisbank.com/retail/cards/credit-card/flipkart-axis-bank-credit-card",
   "sbi-cashback": "https://www.sbicard.com/en/personal/credit-cards/shopping/cashback-sbi-card.page",
+  "amex-plat-travel": "https://www.americanexpress.com/en-in/credit-cards/platinum-travel-credit-card/",
 };

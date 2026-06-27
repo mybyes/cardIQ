@@ -7,6 +7,7 @@ import { scrapeFixture, scrapeLive } from "./scraper.mjs";
 export const SOURCES = {
   curation: { kind: "public-card-data", desc: "Manual editorial add/update of cards & offers — the primary, reliable mechanism for catalog accuracy.", legal: "OK — public product info." },
   scraper: { kind: "public-card-data", desc: "Scrape public offer pages → offers. Fixture-backed demo + best-effort live fetch.", legal: "Grey — honour robots.txt/ToS; prefer official or affiliate feeds." },
+  ota: { kind: "public-offer-feed", desc: "Pull OTA card offers (MakeMyTrip, Cleartrip, Goibibo, EaseMyTrip…) from an offers feed → offers. Adapter ready; needs a feed URL (affiliate/offers API or partner feed) via payload.url or OTA_FEED_URL.", legal: "OK with an authorised affiliate/offers feed; NEVER credential-scrape or breach ToS." },
   sms: { kind: "user-consented", desc: "Parse user-pasted bank transaction SMS → transactions.", legal: "OK with user consent; data stays the user's." },
   csv: { kind: "user-consented", desc: "Parse user-uploaded statement CSV → transactions.", legal: "OK with user consent." },
   email: { kind: "user-consented", desc: "Parse FORWARDED statement/alert emails (free — no Gmail OAuth). Gmail auto-read would need a restricted-scope audit (~$15–75k).", legal: "OK with user consent (forwarded by the user)." },
@@ -59,6 +60,20 @@ export async function runSource(id, payload = {}) {
       const stamped = scraped.offers.map((o) => ({ ...o, fetchedAt: new Date().toISOString() }));
       const counts = scraped.ok ? upsertOffers(stamped) : { added: 0, updated: 0 };
       result = { ...counts, ok: scraped.ok, note: scraped.note };
+      break;
+    }
+    case "ota": {
+      // OTA offers (MMT/Cleartrip/…). Real-time needs a licensed feed; the adapter normalises
+      // it into our offer schema and tags source="ota". No feed → honest not-configured note.
+      const feed = payload.url || process.env.OTA_FEED_URL;
+      if (!feed) {
+        result = { added: 0, updated: 0, ok: false, note: "no OTA feed configured — set payload.url or OTA_FEED_URL (affiliate/offers API)" };
+        break;
+      }
+      const scraped = await scrapeLive(feed); // reuse the public-page parser; swap for a JSON adapter per feed
+      const stamped = scraped.offers.map((o) => ({ ...o, source: "ota", platform: "ota", fetchedAt: new Date().toISOString() }));
+      const counts = scraped.ok ? upsertOffers(stamped) : { added: 0, updated: 0 };
+      result = { ...counts, ok: scraped.ok, note: scraped.ok ? `OTA feed parsed (${feed})` : scraped.note };
       break;
     }
     case "sms":

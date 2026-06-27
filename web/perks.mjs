@@ -29,6 +29,11 @@ export const PERKS = {
     { tag: "Cashback", title: "5% online, any merchant", detail: "No merchant restriction online (capped ₹5,000/mo). Auto-credited — no points, no redemption, no thinking." },
     { tag: "Fee", title: "Fee waiver at ₹2L spend", detail: "The ₹999 annual fee is reversed on ₹2L annual spend — easy to hit if it's your default online card." },
   ],
+  "amex-plat-travel": [
+    { tag: "Milestone", title: "Taj vouchers at ₹1.9L & ₹4L", detail: "Hitting the spend milestones unlocks Taj/IHCL stay vouchers + bonus Membership Rewards — usually the bulk of this card's value." },
+    { tag: "Transfer", title: "Membership Rewards transfers", detail: "Move MR to Marriott Bonvoy 1:1 and select airlines — far better value than the rewards catalog or Pay-with-Points." },
+    { tag: "Lounge", title: "Priority Pass lounge access", detail: "Complimentary domestic lounge visits via Priority Pass — keep it in your bag on travel days." },
+  ],
 };
 
 // Flatten the held cards' perks into a render-ready list.
