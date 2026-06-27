@@ -4,7 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CardIQ — Plan from spend to seat, by chat</title>
-    <meta name="description" content="Tell CardIQ where you want to fly. It finds the award, the best points to use, the transfer route, and where to book — end to end." />
+    <meta name="description" content="Browse India credit-card point transfer routes — ratios, transfer time, caps — for HDFC, Amex, Axis, ICICI, SBI. Or just ask the concierge where you want to fly and it plans it on points." />
+    <link rel="canonical" href="https://cardiq.app/web/transfers.html" />
+    <meta property="og:type" content="website" /><meta property="og:site_name" content="CardIQ" />
+    <meta property="og:title" content="Transfer routes & points concierge — CardIQ" />
+    <meta property="og:description" content="Every transfer route with the fine print — ratios, timing, caps — plus a concierge that plans flights on your points." />
+    <meta property="og:url" content="https://cardiq.app/web/transfers.html" /><meta name="twitter:card" content="summary" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -225,6 +230,8 @@
 
       // ---------- reference table ----------
       const state = { from: "all", to: "all", type: "all", q: "" };
+      // SearchAction / deep-link: ?q= pre-fills the search box (keeps the WebSite searchbox truthful)
+      try { const q0 = new URLSearchParams(location.search).get("q"); if (q0) { state.q = q0; const qi = document.getElementById("f-q"); if (qi) qi.value = q0; } } catch (e) {}
       el("f-from").innerHTML = `<option value="all">All your points</option>` + PROGRAMS.map((p) => `<option>${p}</option>`).join("");
       el("f-to").innerHTML = `<option value="all">All partners</option>` + PARTNERS.map((p) => `<option>${p}</option>`).join("");
       function draw() {

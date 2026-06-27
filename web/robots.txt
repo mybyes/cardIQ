@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /web/index.html
+Sitemap: https://cardiq.app/web/sitemap.xml
