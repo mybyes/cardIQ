@@ -22,6 +22,7 @@ import { detectRecurring, optimizeRecurring } from "../recurring.mjs";
 import * as store from "./store.mjs";
 import * as api from "./api.mjs";
 import { perksForCards, offerOfTheWeek } from "./perks.mjs";
+import { aiReply, GLIMPSE, CONCIERGE_CHIPS } from "./concierge.mjs";
 
 // Live data — defaults to bundled, swapped for platform data when the API is reachable.
 let cards = seedCards;
@@ -148,9 +149,18 @@ async function syncFromPlatform(opts = {}) {
 const el = (id) => document.getElementById(id);
 // Plan gating: Free users are pinned to the "Realistic" (typical) valuation; Optimistic/
 // Conservative and the deeper redeem/plan tools are Pro-only.
-function isPro() { return store.get("plan") === "pro"; }
+function isPro() { const p = store.get("plan"); return p === "pro" || p === "concierge"; }
+function isConcierge() { return store.get("plan") === "concierge"; }
+// Map the user's real held cards → the {program, card, balance} shape the planner uses.
+const PROGRAM_OF = { HDFC_RP: "HDFC Reward Points", EDGE_MILE: "Axis EDGE Miles", MR_POINT: "Amex Membership Rewards" };
+function realWallet(U) {
+  return (U.cards || [])
+    .map((id) => { const c = byId[id]; const program = PROGRAM_OF[c?.reward?.currency]; const balance = U.pointsBalance?.[id] || 0; return program && balance > 0 ? { program, card: c.name, balance } : null; })
+    .filter(Boolean);
+}
 const mode = () => (isPro() ? store.get("mode") || "typical" : "typical");
 const num = (v, fallback = 0) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : fallback);
+const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Current user = seed data, but with the user's chosen cards / ledger / spend overlaid.
 const appUser = () => ({
@@ -164,10 +174,10 @@ const appUser = () => ({
 });
 
 const CATS = ["appliances", "electronics", "travel", "grocery", "dining", "shopping", "transport", "other"];
-const tabs = ["home", "recommend", "plan", "wallet", "redeem", "coach", "getcard", "cards"];
+const tabs = ["home", "recommend", "plan", "wallet", "redeem", "concierge", "coach", "getcard", "cards"];
 
 // ---------- tab switching (grouped: fewer primary tabs + light sub-nav) ----------
-const GROUP_OF = { home: "home", recommend: "use", plan: "use", wallet: "points", redeem: "points", coach: "review", getcard: "getcard", cards: "cards" };
+const GROUP_OF = { home: "home", recommend: "use", plan: "use", wallet: "points", redeem: "points", concierge: "concierge", coach: "review", getcard: "getcard", cards: "cards" };
 const GROUP_CONTAINERS = { use: ["recommend", "plan"], points: ["wallet", "redeem"] };
 const SUB_LABEL = { recommend: "Use a card", plan: "Plan ahead", wallet: "Cards & balances", redeem: "Redeem & goals" };
 
@@ -295,15 +305,19 @@ function wireUpgradeButtons() {
 function renderPlanBar() {
   const bar = el("planbar");
   if (!bar) return;
-  if (isPro()) {
-    bar.innerHTML = `<span class="tag pro">★ Pro</span><button class="mng" id="plan-down" title="Demo: switch back to Free">Free</button>`;
+  if (isConcierge()) {
+    bar.innerHTML = `<span class="tag pro">✦ Concierge</span><button class="mng" id="plan-down" title="Demo: switch back to Free">Free</button>`;
     el("plan-down").addEventListener("click", () => setPlan("free"));
+  } else if (isPro()) {
+    bar.innerHTML = `<span class="tag pro">★ Pro</span><button class="up" id="plan-up" title="Add the AI concierge">Go Concierge</button>`;
+    el("plan-up").addEventListener("click", openUpgrade);
   } else {
     bar.innerHTML = `<span class="tag free">Free</span><button class="up" id="plan-up">Upgrade</button>`;
     el("plan-up").addEventListener("click", openUpgrade);
   }
 }
 el("up-activate")?.addEventListener("click", () => setPlan("pro"));
+el("up-concierge")?.addEventListener("click", () => setPlan("concierge"));
 el("up-close")?.addEventListener("click", closeUpgrade);
 el("upgrade-modal")?.addEventListener("click", (e) => { if (e.target.id === "upgrade-modal") closeUpgrade(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeUpgrade(); });
@@ -395,6 +409,8 @@ function homeUI() {
       <div class="perks">${perks.map((p) => `<div class="perk"><div class="perk-top"><span class="perk-card">${p.cardName}</span><span class="perk-tag">${p.tag}</span></div><div class="perk-t">${p.title}</div><div class="perk-d">${p.detail}</div></div>`).join("")}</div>
     </div>` : ""}
 
+    ${!isConcierge() ? glimpseHTML() : ""}
+
     <div class="panel"><h2>Quick actions</h2>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
         <button class="go" data-tab="recommend">Which card to use?</button>
@@ -406,6 +422,7 @@ function homeUI() {
 
   el("home").querySelectorAll("button[data-tab]").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
   countUpAll(el("home"));
+  wireGlimpse(el("home"));
 }
 
 
@@ -841,6 +858,95 @@ function goalAnalyse() {
   el("goal-out").innerHTML = `<div class="bd" style="margin-bottom:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap">${routeChip(award)} <b>${award.name}</b> · ${award.program}</div>` + body + `<div class="hint" style="margin-top:8px">Award seats are limited and not guaranteed — <a href="${seatLink(award.program)}" target="_blank" rel="noopener">check ${award.program} availability ↗</a> before you transfer.</div>`;
 }
 
+// ---------- AI Concierge (chat) ----------
+function renderReply(r) {
+  const blocks = (r.blocks || [])
+    .map((b) => `<div class="cblock"><div class="bt">${b.t}</div><div class="bb">${b.b}${b.seat ? ` <a href="${b.seat}" target="_blank" rel="noopener">check seats ↗</a>` : ""}</div></div>`)
+    .join("");
+  return `<div class="lead">${r.ai ? `<span class="ai-badge">✦ AI</span>` : ""}${r.lead}</div>
+    ${blocks ? `<div class="cblocks">${blocks}</div>` : ""}
+    ${r.value ? `<div class="cvalue">💰 ${r.value}</div>` : ""}
+    ${r.foot ? `<div class="cfoot">${r.foot}</div>` : ""}
+    ${r.upsell ? `<div class="cfoot">✦ Open-ended ideas like this are an <b>AI Concierge</b> feature. <a href="#" id="cc-upsell">Unlock it →</a></div>` : ""}`;
+}
+
+function glimpseHTML() {
+  return `<div class="panel glimpse">
+    <div class="gl-head"><span class="ai-badge">✦ AI Concierge</span><span class="meta">Concierge plan · preview</span></div>
+    <div class="gl-q">“${GLIMPSE.question}”</div>
+    <div class="gl-stream"></div>
+    <div class="gl-cta"><button class="go gl-open">Open the Concierge →</button><button class="go ghost-min gl-unlock">Unlock AI Concierge</button></div>
+  </div>`;
+}
+function wireGlimpse(root) {
+  if (!root) return;
+  const stream = root.querySelector(".gl-stream");
+  if (stream) {
+    stream.innerHTML = "";
+    GLIMPSE.lines.forEach((ln, i) =>
+      setTimeout(() => {
+        if (!stream.isConnected) return; // user navigated away / re-rendered
+        const d = document.createElement("div");
+        d.className = "gl-line";
+        d.innerHTML = `<span class="dot"></span><span>${ln}</span>`;
+        stream.appendChild(d);
+      }, 480 * (i + 1))
+    );
+  }
+  root.querySelector(".gl-open")?.addEventListener("click", () => switchTab("concierge"));
+  root.querySelector(".gl-unlock")?.addEventListener("click", openUpgrade);
+}
+
+function conciergeUI() {
+  const wallet = realWallet(appUser());
+
+  if (!isPro()) {
+    el("concierge").innerHTML =
+      proGateHTML({
+        badge: "Pro feature",
+        title: "Chat your way from points to a seat",
+        desc: "Ask CardIQ what your real balances can fly you to — it plans the award, the transfer route, the shortfall, and where to book.",
+        bullets: ["Runs on your actual cards & points", "Award + transfer route + timing", "An earn-the-shortfall plan", "✦ AI concierge for open-ended ideas (Concierge plan)"],
+      }) + glimpseHTML();
+    wireGlimpse(el("concierge"));
+    return;
+  }
+
+  const ai = isConcierge();
+  const noPts = !wallet.length;
+  const wal = noPts ? undefined : wallet; // undefined → planner falls back to its sample wallet
+  el("concierge").innerHTML = `
+    <div class="panel">
+      <h2>${ai ? "✦ AI Concierge" : "Your points concierge"}</h2>
+      ${ai
+        ? `<div class="bd" style="margin-bottom:8px">Ask me anything — a destination, a vibe, a goal. I'll plan it on your real wallet.</div>`
+        : `<div class="cc-banner">✦ <b>AI Concierge</b> understands open-ended requests like “somewhere warm in December”. <button class="go" id="cc-go-conc">Unlock — Concierge plan</button></div>`}
+      ${noPts ? `<div class="bd" style="margin-bottom:10px; color:var(--warn)">No transferable points yet — add cards in <b>Cards</b> for tailored plans. Using sample numbers meanwhile.</div>` : ""}
+      <div class="chatbox" id="cc-chat"></div>
+      <div class="cchips" id="cc-chips"></div>
+      <div class="composer2"><input id="cc-q" type="text" placeholder="${ai ? "e.g. somewhere warm in December under 60k points" : "e.g. business class to Singapore — or “use my HDFC points”"}" autocomplete="off" /><button id="cc-send" type="button">Ask</button></div>
+      <div class="hint" style="margin-top:8px">${ai ? "AI Concierge preview — replies are simulated scenarios in this demo." : "Planning on your real balances."} Estimates — confirm before booking.</div>
+    </div>`;
+
+  const chat = el("cc-chat");
+  const add = (html, who) => { const d = document.createElement("div"); d.className = "cmsg " + who; d.innerHTML = html; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; };
+  const ask = (text) => {
+    if (!text.trim()) return;
+    add(escapeHtml(text), "me");
+    el("cc-q").value = "";
+    const reply = aiReply(text, wal, ai);
+    setTimeout(() => { add(renderReply(reply), "bot"); el("cc-upsell")?.addEventListener("click", (e) => { e.preventDefault(); openUpgrade(); }); }, 240);
+  };
+  const chips = ai ? CONCIERGE_CHIPS : ["Business class to Singapore", "A free domestic flight", "Use my HDFC points"];
+  el("cc-chips").innerHTML = chips.map((c) => `<button class="cchip" type="button">${escapeHtml(c)}</button>`).join("");
+  el("cc-chips").querySelectorAll(".cchip").forEach((b) => b.addEventListener("click", () => ask(b.textContent)));
+  el("cc-send").addEventListener("click", () => ask(el("cc-q").value));
+  el("cc-q").addEventListener("keydown", (e) => { if (e.key === "Enter") ask(el("cc-q").value); });
+  el("cc-go-conc")?.addEventListener("click", openUpgrade);
+
+  add(`<div class="lead">${ai ? `<span class="ai-badge">✦ AI</span>` : ""}${ai ? "Hi — I'm your AI concierge. Tell me a destination, a vibe, or a goal and I'll plan it on your wallet." : "Hi 👋 tell me where you'd like to go and I'll plan it on your real balances."}</div>`, "bot");
+}
+
 // ---------- Coach ----------
 function coachUI() {
   el("coach").innerHTML = `
@@ -1168,7 +1274,7 @@ function render() {
   const active = tabs.find((t) => !el(t).hidden) || "recommend";
   try {
     if (active !== "cards" && appUser().cards.length === 0) return emptyState(active);
-    ({ home: homeUI, recommend: recommendUI, plan: planUI, wallet: walletUI, redeem: redeemUI, coach: coachUI, getcard: getCardUI, cards: cardsUI }[active])();
+    ({ home: homeUI, recommend: recommendUI, plan: planUI, wallet: walletUI, redeem: redeemUI, concierge: conciergeUI, coach: coachUI, getcard: getCardUI, cards: cardsUI }[active])();
   } catch (err) {
     console.error(err);
     el(active).innerHTML = `<div class="panel"><h2>Something went wrong</h2><div class="bd warn">${String(err.message || err)}</div><div style="margin-top:10px"><button class="go" id="err-reset" style="background:var(--panel2); color:var(--text); border:1px solid var(--line)">Reset app data</button></div></div>`;
