@@ -187,12 +187,41 @@
       .crow .ct { font: 600 12px Inter; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
       .crow .cs { font: 500 15px Inter; margin-top: 2px; }
 
+      /* pricing */
+      .pricehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+      .btoggle { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 4px; }
+      .btoggle button { border: 0; background: transparent; padding: 9px 17px; border-radius: 999px; font: 600 13.5px Inter; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
+      .btoggle button.on { background: var(--ink); color: #f1ead9; }
+      .btoggle .save { color: var(--gold-lt); font-size: 11px; margin-left: 3px; }
+      .btoggle button.on .save { color: var(--gold-lt); }
+      .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 30px; align-items: start; }
+      .tier { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 28px 26px; box-shadow: var(--sh); position: relative; }
+      .tier.feat { border-color: var(--gold); box-shadow: 0 22px 54px rgba(168,130,46,.22); }
+      .tier .pop { position: absolute; top: -12px; left: 26px; background: var(--gold); color: #14110a; font: 600 11px Inter; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; }
+      .tier .tname { font: 500 23px var(--serif); }
+      .tier .tdesc { color: var(--muted); font-size: 13.5px; margin-top: 4px; min-height: 38px; }
+      .tier .price { margin: 14px 0 2px; display: flex; align-items: baseline; gap: 6px; }
+      .tier .price .amt { font: 500 42px var(--serif); letter-spacing: -.02em; }
+      .tier .price .per { color: var(--muted); font-size: 13.5px; }
+      .tier .billed { color: var(--green); font-size: 12.5px; min-height: 18px; }
+      .tier .cta { display: block; width: 100%; text-align: center; margin: 18px 0; border-radius: 11px; padding: 13px; font: 600 14.5px Inter; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: transparent; color: var(--text); transition: filter .15s, border-color .15s; }
+      .tier .cta:hover { border-color: var(--gold); }
+      .tier.feat .cta { background: var(--ink); color: #f1ead9; border: 0; }
+      .tier.feat .cta:hover { filter: brightness(1.18); }
+      .tier .feats { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+      .tier .feats li { display: flex; gap: 9px; font-size: 14px; color: var(--text); align-items: flex-start; line-height: 1.4; }
+      .tier .feats li svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex: none; margin-top: 2px; }
+      .tier .feats li.grp { font: 600 11px Inter; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 4px 0 0; display: block; }
+      .pricenote { text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 24px; }
+      .pricenote a { color: var(--gold); }
+
       @media (max-width: 860px) {
         .hero { grid-template-columns: 1fr; } .art { display: none; }
         h1 { font-size: 42px; } .stats { grid-template-columns: repeat(2,1fr); }
         .steps { grid-template-columns: 1fr; } .fcols { grid-template-columns: 1fr 1fr; }
         .dash .hd .grow { margin-left: 0; } td, th { padding: 12px 18px; }
         .abt { grid-template-columns: 1fr; } .contact { grid-template-columns: 1fr; }
+        .tiers { grid-template-columns: 1fr; }
         nav .right a:not(.gbtn) { display: none; }
       }
     </style>
@@ -202,7 +231,7 @@
     <div class="wrap">
       <nav>
         <span class="brand">Card<b>IQ</b></span>
-        <span class="right"><a href="#how">How it works</a><a href="#about">About</a><a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="/web/index.html" id="enter-link" class="gbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a8822e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in</a></span>
+        <span class="right"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="/web/index.html" id="enter-link" class="gbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a8822e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in</a></span>
       </nav>
 
       <section class="hero">
@@ -278,6 +307,70 @@
         </div>
       </section>
 
+      <section class="section" id="pricing">
+        <div class="pricehead">
+          <div>
+            <span class="eyebrow"><span class="dot"></span>Pricing</span>
+            <h2 class="sec">Pays for itself in one smart redemption.</h2>
+            <p class="sec-sub">Start free. Upgrade when you want CardIQ to plan — and book — the trip for you.</p>
+          </div>
+          <div class="btoggle" id="btoggle">
+            <button class="on" data-cycle="monthly" type="button">Monthly</button>
+            <button data-cycle="annual" type="button">Annual <span class="save">−20%</span></button>
+          </div>
+        </div>
+        <div class="tiers">
+          <div class="tier">
+            <div class="tname">Free</div>
+            <div class="tdesc">See what your points are really worth.</div>
+            <div class="price"><span class="amt">₹0</span><span class="per">forever</span></div>
+            <div class="billed">&nbsp;</div>
+            <button class="cta signup" type="button">Build my wallet</button>
+            <ul class="feats">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Up to 3 cards</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Points valued in ₹ (typical)</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Which card to use — everyday spends</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Paste SMS / CSV import</li>
+            </ul>
+          </div>
+
+          <div class="tier feat">
+            <span class="pop">Most popular</span>
+            <div class="tname">Pro</div>
+            <div class="tdesc">Redeem smarter — and actually book the trip.</div>
+            <div class="price"><span class="amt" data-m="₹199" data-a="₹159">₹199</span><span class="per">/ month</span></div>
+            <div class="billed" data-m="" data-a="Billed ₹1,908/year">&nbsp;</div>
+            <button class="cta signup" type="button">Go Pro</button>
+            <ul class="feats">
+              <li class="grp">Everything in Free, plus</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Unlimited cards</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Best / typical / floor valuations + live transfer ratios</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> <b>Smart redemption optimiser</b> — the best transfer path, every time</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> <b>Flight &amp; hotel award finder</b> — sweet spots + where to book</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Goal planner — plan a trip, reach the award</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Transfer-bonus &amp; expiry alerts</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Auto-import forwarded statements</li>
+            </ul>
+          </div>
+
+          <div class="tier">
+            <div class="tname">Concierge</div>
+            <div class="tdesc">We do it for you — done-for-you redemptions.</div>
+            <div class="price"><span class="amt" data-m="₹999" data-a="₹799">₹999</span><span class="per">/ month</span></div>
+            <div class="billed" data-m="" data-a="Billed ₹9,588/year">&nbsp;</div>
+            <a class="cta" href="mailto:hello@cardiq.app?subject=CardIQ%20Concierge">Talk to us</a>
+            <ul class="feats">
+              <li class="grp">Everything in Pro, plus</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> 1:1 redemption concierge — we find &amp; book the seat</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Priority award-seat hunting</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Personalised quarterly points strategy</li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> Early access to bonus opportunities</li>
+            </ul>
+          </div>
+        </div>
+        <p class="pricenote">One business-class redemption can be worth <b style="color:var(--gold)">₹15,000+</b> over a cash booking — Pro pays for itself the first time. No card numbers, no bank login · cancel anytime · prices incl. GST · <a href="/web/legal.html#terms">Terms</a> apply.</p>
+      </section>
+
       <section class="section">
         <div class="forward">
           <div class="t">
@@ -342,7 +435,7 @@
         <div class="fcols">
           <div><span class="brand">Card<b>IQ</b></span><p class="lede2" style="margin-top:10px">The intelligence layer for your credit-card points. Crafted for people who travel on points.</p></div>
           <div><h4>Product</h4><a href="/web/index.html#recommend">Which card to use</a><a href="/web/index.html#wallet">Points &amp; value</a><a href="/web/index.html#redeem">Redeem &amp; transfers</a><a href="/web/index.html#plan">Plan a goal</a><a href="/web/index.html#getcard">Get a card</a></div>
-          <div><h4>Company</h4><a href="#about">About us</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></div>
+          <div><h4>Company</h4><a href="#about">About us</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></div>
           <div><h4>Legal</h4><a href="/web/legal.html#privacy">Privacy</a><a href="/web/legal.html#terms">Terms</a><a href="/web/legal.html#disclaimer">Disclaimer</a><a href="mailto:hello@cardiq.app">hello@cardiq.app</a></div>
         </div>
         <div class="fbar"><span>© 2026 CardIQ · Indian-market data, point-in-time.</span><span style="margin-left:auto">Verify card terms with your issuer before deciding.</span></div>
@@ -439,6 +532,22 @@
       function goSignup() { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(function () { var el = document.getElementById("email"); if (el) el.focus(); }, 420); }
       ["enter-link2", "opp"].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener("click", function (e) { e.preventDefault(); goSignup(); }); });
       document.querySelectorAll("a.ent").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); goSignup(); }); });
+
+      // Pricing: monthly / annual billing toggle + plan CTAs
+      (function () {
+        var tg = document.getElementById("btoggle");
+        if (!tg) return;
+        function setCycle(cycle) {
+          tg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.cycle === cycle); });
+          document.querySelectorAll("#pricing [data-m]").forEach(function (el) {
+            var v = cycle === "annual" ? el.getAttribute("data-a") : el.getAttribute("data-m");
+            if (el.classList.contains("billed")) el.innerHTML = v ? v : "&nbsp;";
+            else el.textContent = v;
+          });
+        }
+        tg.querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () { setCycle(b.dataset.cycle); }); });
+      })();
+      document.querySelectorAll("#pricing .cta.signup").forEach(function (b) { b.addEventListener("click", function (e) { e.preventDefault(); goSignup(); }); });
     </script>
   </body>
 </html>
