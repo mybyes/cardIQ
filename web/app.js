@@ -1068,4 +1068,13 @@ function render() {
   }
 }
 render();
+
+// deep-link: /web/index.html#recommend (or #wallet, #redeem, #plan, #getcard…) opens that tab
+function applyHashTab() {
+  const h = (location.hash || "").replace(/^#/, "");
+  if (h && tabs.includes(h)) switchTab(h);
+}
+applyHashTab();
+window.addEventListener("hashchange", applyHashTab);
+
 syncFromPlatform(); // upgrade to live platform data if the API is reachable

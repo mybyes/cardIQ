@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CardIQ — Privacy, Terms & Disclaimer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      :root {
+        --paper: #ece4d4; --ink: #14110a; --panel: #fbf8f1; --line: #ddd1ba;
+        --text: #1a160d; --muted: #736a57; --gold: #a8822e; --green: #2f6b4f;
+        --serif: "Fraunces", Georgia, serif; --sh: 0 12px 34px rgba(50,38,16,.14);
+      }
+      body { font-family: Inter, sans-serif; color: var(--text); background: var(--paper); line-height: 1.65; -webkit-font-smoothing: antialiased; }
+      a { color: var(--gold); }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+      nav { display: flex; align-items: center; padding: 24px 0; }
+      .brand { font: 600 22px var(--serif); letter-spacing: -.01em; text-decoration: none; color: var(--text); }
+      .brand b { color: var(--gold); }
+      nav .back { margin-left: auto; font-size: 14px; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+      nav .back:hover { color: var(--gold); }
+
+      header.hd { padding: 30px 0 18px; border-bottom: 1px solid var(--line); }
+      .eyebrow { font: 600 12px Inter; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+      h1 { font: 600 44px var(--serif); letter-spacing: -.025em; margin: 12px 0 8px; }
+      .sub { color: var(--muted); }
+      .updated { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+      .toc { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 8px; }
+      .toc a { display: inline-flex; align-items: center; gap: 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; font: 600 13.5px Inter; color: var(--text); text-decoration: none; transition: border-color .15s, transform .12s; }
+      .toc a:hover { border-color: var(--gold); transform: translateY(-1px); }
+      .toc a .n { color: var(--gold); }
+
+      section.doc { padding: 40px 0; border-top: 1px solid var(--line); scroll-margin-top: 20px; }
+      section.doc:first-of-type { border-top: 0; }
+      h2 { font: 500 30px var(--serif); letter-spacing: -.02em; margin-bottom: 6px; }
+      h3 { font: 600 16px Inter; margin: 24px 0 6px; }
+      p, li { color: #2c2618; font-size: 15px; }
+      p { margin: 8px 0; }
+      ul { margin: 8px 0 8px 2px; padding-left: 20px; }
+      li { margin: 5px 0; }
+      .lead { color: var(--muted); font-size: 16px; margin-bottom: 4px; }
+      .callout { background: rgba(47,107,79,.08); border: 1px solid rgba(47,107,79,.2); border-radius: 14px; padding: 14px 16px; margin: 16px 0; font-size: 14.5px; }
+      .callout b { color: var(--green); }
+      .top { display: inline-block; margin-top: 18px; font-size: 13px; color: var(--muted); text-decoration: none; }
+      .top:hover { color: var(--gold); }
+
+      footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--text); text-decoration: none; }
+      footer a:hover { color: var(--gold); }
+      @media (max-width: 620px) { h1 { font-size: 34px; } h2 { font-size: 25px; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="/web/login.html">Card<b>IQ</b></a>
+        <a class="back" href="/web/login.html">&larr; Back to home</a>
+      </nav>
+
+      <header class="hd">
+        <span class="eyebrow">Legal</span>
+        <h1>Privacy, Terms &amp; Disclaimer</h1>
+        <p class="sub">Plain-language policies for how CardIQ handles your data and what our tools do — and don't — promise.</p>
+        <p class="updated">Last updated: 28 June 2026 · Questions? <a href="mailto:hello@cardiq.app">hello@cardiq.app</a></p>
+        <div class="toc">
+          <a href="#privacy"><span class="n">01</span> Privacy Policy</a>
+          <a href="#terms"><span class="n">02</span> Terms of Use</a>
+          <a href="#disclaimer"><span class="n">03</span> Disclaimer</a>
+        </div>
+      </header>
+
+      <section class="doc" id="privacy">
+        <h2>01 · Privacy Policy</h2>
+        <p class="lead">We collect the minimum needed to value your points and recommend cards — nothing more.</p>
+
+        <div class="callout"><b>What we never ask for:</b> card numbers, CVVs, PINs, net-banking passwords, or bank logins. CardIQ does not read your email inbox.</div>
+
+        <h3>Information we collect</h3>
+        <ul>
+          <li><b>Account:</b> your name and email, used to sign you in (via Google sign-in or a one-time email link).</li>
+          <li><b>Your wallet:</b> the cards and loyalty programs you choose to add.</li>
+          <li><b>Optional spend data:</b> only if you choose to import it — by forwarding statement/alert emails to our import address, or pasting an SMS/CSV. You control what you share.</li>
+          <li><b>Usage:</b> basic, privacy-respecting analytics to improve the product.</li>
+        </ul>
+
+        <h3>How we use it</h3>
+        <ul>
+          <li>To value your points in rupees and recommend which card to use.</li>
+          <li>To plan the best redemption and transfer paths for your goals.</li>
+          <li>To notify you about opportunities (e.g. transfer bonuses) you opt into.</li>
+        </ul>
+
+        <h3>Sharing</h3>
+        <p>We do not sell or rent your personal data. We share data only with service providers needed to run CardIQ (e.g. hosting), under contract. If you choose to apply for a card we suggest, you leave for the issuer/partner's own site — we may receive a referral fee, but we never pass your CardIQ data to them.</p>
+
+        <h3>Your rights (DPDP Act, 2023)</h3>
+        <ul>
+          <li>Access, correct, or update your data.</li>
+          <li>Withdraw consent and delete your wallet at any time.</li>
+          <li>Raise a grievance — we'll respond within statutory timelines.</li>
+        </ul>
+        <p>To exercise any of these, email <a href="mailto:hello@cardiq.app">hello@cardiq.app</a>.</p>
+
+        <h3>Security &amp; retention</h3>
+        <p>Data is encrypted in transit. We keep your data only while your account is active or as required by law, and delete it on request.</p>
+        <a class="top" href="#privacy">↑ Back to top</a>
+      </section>
+
+      <section class="doc" id="terms">
+        <h2>02 · Terms of Use</h2>
+        <p class="lead">By using CardIQ you agree to these terms. If you don't, please don't use the service.</p>
+
+        <h3>What CardIQ is</h3>
+        <p>CardIQ is an informational tool that estimates the value of credit-card reward points and suggests how to earn and redeem them. It is <b>not</b> financial, tax, or investment advice, and we are not a bank, broker, or a SEBI/RBI-regulated adviser.</p>
+
+        <h3>Accuracy of information</h3>
+        <p>Point values, transfer ratios, offers, and award estimates are point-in-time and may change without notice. We work to keep data fresh and stamp it with a date, but you must verify card terms, fees, eligibility, and current offers with the issuer or program before you act.</p>
+
+        <h3>Affiliate disclosure</h3>
+        <p>Some "Get a card" links are affiliate links — if you apply and are approved, CardIQ may earn a referral fee at no cost to you. This never changes the recommendations we show; rankings are based on value to you.</p>
+
+        <h3>Acceptable use</h3>
+        <ul>
+          <li>Use CardIQ for your own personal, lawful purposes.</li>
+          <li>Don't scrape, resell, or misuse the service or its data.</li>
+          <li>Keep your account secure; you're responsible for activity under it.</li>
+        </ul>
+
+        <h3>Liability</h3>
+        <p>CardIQ is provided "as is". To the extent permitted by law, we are not liable for losses arising from decisions you make using our estimates. Your reward outcomes depend on issuer terms and availability outside our control.</p>
+
+        <h3>Changes &amp; governing law</h3>
+        <p>We may update these terms; material changes will be posted here. These terms are governed by the laws of India, with courts at our registered location having jurisdiction.</p>
+        <a class="top" href="#terms">↑ Back to top</a>
+      </section>
+
+      <section class="doc" id="disclaimer">
+        <h2>03 · Disclaimer</h2>
+        <p class="lead">Read this before acting on anything CardIQ shows you.</p>
+
+        <div class="callout"><b>Not financial advice.</b> CardIQ provides general information and estimates to help you compare options. It does not consider your full financial situation and is not a substitute for professional advice.</div>
+
+        <h3>Estimates, not guarantees</h3>
+        <ul>
+          <li>Reward valuations are modelled (best / typical / conservative) and will differ from what you actually realise.</li>
+          <li>Award availability — flight seats, hotel nights, transfer bonuses — is set by the airline/hotel/issuer and is <b>not guaranteed</b>. We link out to check live availability where possible.</li>
+          <li>Fees, interest, and eligibility are set by issuers. A card that earns well can still be wrong for you if you carry a balance.</li>
+        </ul>
+
+        <h3>Verify before you decide</h3>
+        <p>Always confirm the current rate, cap, fee, and terms directly with your card issuer or loyalty program. CardIQ is not responsible for changes made by third parties.</p>
+
+        <p>Questions about any of the above? Write to <a href="mailto:hello@cardiq.app">hello@cardiq.app</a>.</p>
+        <a class="top" href="#disclaimer">↑ Back to top</a>
+      </section>
+
+      <footer>
+        <span>© 2026 CardIQ · Indian-market data, point-in-time.</span>
+        <span style="margin-left:auto"><a href="/web/login.html">Home</a> · <a href="/web/login.html#contact">Contact</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

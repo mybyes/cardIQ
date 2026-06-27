@@ -341,9 +341,9 @@
       <footer>
         <div class="fcols">
           <div><span class="brand">Card<b>IQ</b></span><p class="lede2" style="margin-top:10px">The intelligence layer for your credit-card points. Crafted for people who travel on points.</p></div>
-          <div><h4>Product</h4><a href="#how">How it works</a><a href="#dash">Points value</a><a href="#dash">Redeem &amp; goals</a><a href="/web/index.html" class="ent">Open the app</a></div>
-          <div><h4>Company</h4><a href="#about">About us</a><a href="#faq">FAQ</a><a href="#contact">Contact</a><a href="mailto:hello@cardiq.app">hello@cardiq.app</a></div>
-          <div><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Disclaimer</a><a href="#contact">Data &amp; DPDP</a></div>
+          <div><h4>Product</h4><a href="/web/index.html#recommend">Which card to use</a><a href="/web/index.html#wallet">Points &amp; value</a><a href="/web/index.html#redeem">Redeem &amp; transfers</a><a href="/web/index.html#plan">Plan a goal</a><a href="/web/index.html#getcard">Get a card</a></div>
+          <div><h4>Company</h4><a href="#about">About us</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></div>
+          <div><h4>Legal</h4><a href="/web/legal.html#privacy">Privacy</a><a href="/web/legal.html#terms">Terms</a><a href="/web/legal.html#disclaimer">Disclaimer</a><a href="mailto:hello@cardiq.app">hello@cardiq.app</a></div>
         </div>
         <div class="fbar"><span>© 2026 CardIQ · Indian-market data, point-in-time.</span><span style="margin-left:auto">Verify card terms with your issuer before deciding.</span></div>
       </footer>
@@ -376,7 +376,9 @@
           localStorage.setItem("cardiq-session", "1");
           if (profile) localStorage.setItem("cardiq-user", JSON.stringify(profile));
         } catch (e) {}
-        location.href = "/web/index.html";
+        var after = null;
+        try { after = sessionStorage.getItem("cardiq-after"); sessionStorage.removeItem("cardiq-after"); } catch (e) {}
+        location.href = after || "/web/index.html";
       }
       function b64urlJson(s) {
         try { return JSON.parse(decodeURIComponent(atob(s.replace(/-/g, "+").replace(/_/g, "/")).split("").map(function (c) { return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2); }).join(""))); }
