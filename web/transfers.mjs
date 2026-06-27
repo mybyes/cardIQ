@@ -60,6 +60,104 @@ export const routes = [
 
 export const PARTNERS = [...new Set(routes.map((r) => r.to))].sort();
 
+// ---------------------------------------------------------------------------
+// Chat journey engine — turns a plain-language goal into an end-to-end plan:
+// award cost → which of your points → best transfer route → shortfall & how to
+// earn it → where to book. All numbers are illustrative estimates (award charts
+// and fares move constantly); confirm live before booking.
+// ---------------------------------------------------------------------------
+
+// A demo wallet so the concierge works before sign-in (mirrors the landing dashboard).
+export const SAMPLE_WALLET = [
+  { program: "HDFC Reward Points", card: "HDFC Infinia", balance: 500000 },
+  { program: "Amex Membership Rewards", card: "Amex Platinum", balance: 240000 },
+  { program: "Axis EDGE Miles", card: "Axis Atlas", balance: 85000 },
+];
+
+// Award targets (the "flight search"): partner program + miles + cash benchmark.
+export const GOALS = [
+  { id: "sin-biz", label: "Business class to Singapore", match: ["singapore", "sin", "krisflyer"], cabin: "Business", route: "Delhi → Singapore", air: "Singapore Airlines · SQ Saver business (Star Alliance)", partner: "Singapore KrisFlyer", miles: 51000, taxes: 6000, cash: 155000, seat: "https://seats.aero/search" },
+  { id: "dxb-biz", label: "Business class to Dubai", match: ["dubai", "dxb"], cabin: "Business", route: "Delhi → Dubai", air: "Air India · nonstop business", partner: "Air India Maharaja Club", miles: 55000, taxes: 8000, cash: 110000, seat: "https://www.airindia.com" },
+  { id: "lhr-biz", label: "Business class to London", match: ["london", "lhr", "uk", "england"], cabin: "Business", route: "Delhi → London", air: "Qatar Airways · Qsuite via Doha (Avios)", partner: "Qatar Privilege Club (Avios)", miles: 80000, taxes: 25000, cash: 240000, seat: "https://seats.aero/search" },
+  { id: "dom", label: "A free domestic flight", match: ["domestic", "goa", "mumbai", "bengaluru", "bangalore", "within india", "free flight"], cabin: "Economy", route: "Any domestic", air: "Air India / partners", partner: "Air India Maharaja Club", miles: 10000, taxes: 1200, cash: 6500, seat: "https://www.airindia.com" },
+];
+
+const EARN_PER_100 = { "HDFC Reward Points": 3.3, "Amex Membership Rewards": 1.5, "Axis EDGE Miles": 2, "ICICI Reward Points": 2, "SBI Reward Points": 2, "Standard Chartered Rewards": 1 };
+
+const ratioFactor = (r) => { const [a, b] = r.split(":").map(Number); return a / (b || 1); }; // source points per 1 partner mile
+const inr = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+function findGoal(t) { const s = t.toLowerCase(); return GOALS.find((g) => g.match.some((m) => s.includes(m))); }
+function findProgram(t) {
+  const s = t.toLowerCase();
+  const map = [["hdfc", "HDFC Reward Points"], ["infinia", "HDFC Reward Points"], ["diners", "HDFC Reward Points"], ["amex", "Amex Membership Rewards"], ["membership reward", "Amex Membership Rewards"], ["platinum", "Amex Membership Rewards"], ["axis", "Axis EDGE Miles"], ["atlas", "Axis EDGE Miles"], ["edge", "Axis EDGE Miles"], ["icici", "ICICI Reward Points"], ["sbi", "SBI Reward Points"], ["standard chartered", "Standard Chartered Rewards"]];
+  const hit = map.find(([k]) => s.includes(k));
+  return hit ? hit[1] : null;
+}
+
+// Main entry: returns a structured plan the chat UI renders.
+export function planJourney(text, wallet = SAMPLE_WALLET) {
+  const goal = findGoal(text);
+  const prog = findProgram(text);
+  if (goal) return planForAward(goal, wallet, prog);
+  if (prog) return planForPoints(prog, wallet);
+  return { kind: "unknown" };
+}
+
+function planForAward(goal, wallet, prefProg) {
+  const cands = wallet
+    .map((w) => {
+      const route = routes.find((r) => r.from === w.program && r.to === goal.partner);
+      if (!route) return null;
+      const factor = ratioFactor(route.ratio);
+      const sourceNeeded = Math.round(goal.miles * factor);
+      return { program: w.program, card: w.card, balance: w.balance, ratio: route.ratio, time: route.time, cap: route.cap, factor, sourceNeeded, covered: w.balance >= sourceNeeded };
+    })
+    .filter(Boolean);
+
+  if (!cands.length) return { kind: "goal-noroute", goal };
+
+  cands.sort((a, b) => b.covered - a.covered || (a.covered ? a.sourceNeeded - b.sourceNeeded : a.sourceNeeded - a.balance - (b.sourceNeeded - b.balance)));
+  if (prefProg) { const i = cands.findIndex((c) => c.program === prefProg); if (i > 0) cands.unshift(cands.splice(i, 1)[0]); }
+
+  const pick = cands[0];
+  const shortfall = Math.max(0, pick.sourceNeeded - pick.balance);
+  const earn = shortfall ? { shortfall, spend: Math.round((shortfall * 100) / (EARN_PER_100[pick.program] || 1)), card: pick.card } : null;
+  const saved = goal.cash - goal.taxes;
+
+  return {
+    kind: "goal",
+    goal,
+    pick,
+    alternatives: cands.slice(1, 3),
+    earn,
+    value: { cash: goal.cash, taxes: goal.taxes, saved },
+    fmt: { sourceNeeded: pick.sourceNeeded.toLocaleString("en-IN"), balance: pick.balance.toLocaleString("en-IN"), miles: goal.miles.toLocaleString("en-IN"), taxes: inr(goal.taxes), cash: inr(goal.cash), saved: inr(saved), shortfall: shortfall.toLocaleString("en-IN"), spend: earn ? inr(earn.spend) : "" },
+  };
+}
+
+function planForPoints(prog, wallet) {
+  const w = wallet.find((x) => x.program === prog) || { program: prog, card: prog, balance: 0 };
+  const opts = routes.filter((r) => r.from === prog).map((r) => ({ ...r, factor: ratioFactor(r.ratio) }));
+  if (!opts.length) return { kind: "unknown" };
+  opts.sort((a, b) => a.factor - b.factor || (a.type === "airline" ? -1 : 1) - (b.type === "airline" ? -1 : 1));
+  const best = opts[0];
+  const partnerMiles = Math.floor(w.balance / best.factor);
+  const g = GOALS.find((x) => x.partner === best.to);
+  const seats = g ? Math.floor(partnerMiles / g.miles) : null;
+  return {
+    kind: "points",
+    program: prog,
+    card: w.card,
+    balance: w.balance,
+    best,
+    partnerMiles,
+    goal: g,
+    seats,
+    fmt: { balance: w.balance.toLocaleString("en-IN"), partnerMiles: partnerMiles.toLocaleString("en-IN") },
+  };
+}
+
 // Headline counts for the explorer hero.
 export const stats = () => ({
   routes: routes.length,
