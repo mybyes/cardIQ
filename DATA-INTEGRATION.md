@@ -9,6 +9,30 @@ Not everything can or should be real-time — match the cadence to how fast each
 
 ---
 
+## The provider seam — built now, API-ready for later
+
+Everything routes through one layer: [web/providers.mjs](web/providers.mjs). Each data domain has
+a provider that returns **local/curated data today** and carries an explicit `── API SEAM ──`
+where the real call drops in. Going live later = implement that one function + flip the domain's
+`source` to `"api"`. **No call-site changes; every flow already works.**
+
+The live map is visible in the [Data & sources console](web/review.html) → "Integration status &
+API roadmap" (domain · data today · API to plug in · **cost: free/freemium/paid/partner** · status).
+The buy-or-not decision is deliberately a **later phase** — after app/flow review.
+
+| Domain | Today | API drop-in | Cost |
+|---|---|---|---|
+| Cards / rules | curated | curated DB + ccreward / direct MITC | free |
+| Offers | curated + fixtures | Coupon API / direct issuer pages | freemium |
+| Transfer routes | curated | direct issuer pages | free |
+| Valuation | curated model | derived (no external API) | n/a |
+| Perks | curated | direct benefit pages | free |
+| Cash fares | estimate | Amadeus / Travelpayouts | **paid** |
+| Award seats | link-out | seats.aero (partner) | **partner** |
+| Spend | user import | Account Aggregator | **paid** |
+| Balances | user import | none (login-gated) | n/a |
+| AI concierge | scenario player | Anthropic Claude (metered) | **paid** |
+
 ## The six data domains — source, access, cadence
 
 | Domain | Changes | Realistic source (2026) | Access model | Cadence |
