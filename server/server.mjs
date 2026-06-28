@@ -30,7 +30,7 @@ function cacheControl(filePath) {
 
 // Serve the static web app (so one Node process hosts API + UI — ideal for Railway).
 async function serveStatic(res, pathname) {
-  let rel = pathname === "/" ? "/web/index.html" : pathname;
+  let rel = pathname === "/" ? "/web/login.html" : pathname; // root → landing (SEO homepage)
   const filePath = normalize(join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) return json(res, 403, { error: "forbidden" }); // no traversal
   try {
