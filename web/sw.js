@@ -4,8 +4,8 @@
 //   • Google Fonts              → cache-first (immutable, the heaviest external payload).
 //   • same-origin static assets → stale-while-revalidate (instant from cache, refresh behind).
 //   • /api/*                    → bypass (always network, never cached).
-const CACHE = "cardiq-v3";
-const SHELL = ["/web/login.html", "/web/index.html", "/web/transfers.html", "/web/app.js"];
+const CACHE = "cardiq-v4";
+const SHELL = ["/web/login.html", "/web/index.html", "/web/transfers.html", "/web/app.js", "/web/offline.html", "/web/fonts.css"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
@@ -29,7 +29,7 @@ self.addEventListener("fetch", (e) => {
         if (res && res.ok) c.put(req, res.clone());
         return res;
       } catch {
-        return (await c.match(req)) || (await c.match("/web/login.html")) || new Response("<h1>Offline</h1><p>You're offline and this page isn't cached yet.</p>", { status: 503, headers: { "Content-Type": "text/html" } });
+        return (await c.match(req)) || (await c.match("/web/offline.html")) || (await c.match("/web/login.html")) || new Response("<h1>Offline</h1>", { status: 503, headers: { "Content-Type": "text/html" } });
       }
     })());
     return;

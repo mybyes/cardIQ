@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CardIQ — offline</title>
+    <meta name="theme-color" content="#14110a" />
+    <link rel="icon" href="/web/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/web/fonts.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      body { font-family: Inter, sans-serif; background: #ece4d4; color: #1a160d; line-height: 1.6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
+      .card { max-width: 440px; text-align: center; }
+      .mark { font: 600 26px "Fraunces", Georgia, serif; }
+      .mark b { color: #a8822e; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: #9c4128; display: inline-block; margin-right: 7px; vertical-align: middle; }
+      h1 { font: 600 32px "Fraunces", Georgia, serif; letter-spacing: -.02em; margin: 18px 0 8px; }
+      p { color: #736a57; }
+      .pill { display: inline-flex; align-items: center; font: 600 12px Inter; letter-spacing: .04em; color: #9c4128; background: #f1e1d6; border-radius: 999px; padding: 6px 13px; margin-top: 16px; }
+      button { margin-top: 22px; background: #14110a; color: #f1ead9; border: 0; border-radius: 11px; padding: 13px 24px; font: 600 14.5px Inter; cursor: pointer; }
+      button:hover { filter: brightness(1.18); }
+      .hint { margin-top: 16px; font-size: 13px; color: #736a57; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="mark">Card<b>IQ</b></div>
+      <div class="pill"><span class="dot"></span>You're offline</div>
+      <h1>No connection right now</h1>
+      <p>This page isn't saved for offline yet. Pages you've already opened still work without internet — your wallet and points are stored on your device.</p>
+      <button onclick="location.reload()">Try again</button>
+      <div class="hint">Tip: open CardIQ once on a good connection and it'll keep working on low or no signal.</div>
+    </div>
+  </body>
+</html>
