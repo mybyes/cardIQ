@@ -15,7 +15,18 @@ seedIfEmpty();
 const PORT = process.env.PORT || 4322;
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), ".."); // project root
 
-const MIME = { ".html": "text/html", ".js": "application/javascript", ".mjs": "application/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".png": "image/png" };
+const MIME = { ".html": "text/html", ".js": "application/javascript", ".mjs": "application/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".png": "image/png", ".woff2": "font/woff2", ".woff": "font/woff", ".webmanifest": "application/manifest+json", ".xml": "application/xml", ".txt": "text/plain" };
+
+// Cache policy: fonts/images are content-stable → cache hard; HTML + the SW script must stay
+// fresh so deploys take effect; unhashed JS/CSS revalidate (the service worker provides speed).
+function cacheControl(filePath) {
+  const ext = extname(filePath);
+  if (ext === ".woff2" || ext === ".woff") return "public, max-age=31536000, immutable";
+  if (ext === ".svg" || ext === ".png" || ext === ".ico") return "public, max-age=604800"; // 1 week
+  if (ext === ".html" || filePath.endsWith("sw.js")) return "no-cache";
+  if (ext === ".js" || ext === ".mjs" || ext === ".css") return "no-cache"; // unhashed → revalidate
+  return "public, max-age=3600";
+}
 
 // Serve the static web app (so one Node process hosts API + UI — ideal for Railway).
 async function serveStatic(res, pathname) {
@@ -24,7 +35,9 @@ async function serveStatic(res, pathname) {
   if (!filePath.startsWith(ROOT)) return json(res, 403, { error: "forbidden" }); // no traversal
   try {
     const body = await readFile(filePath);
-    res.writeHead(200, { "Content-Type": (MIME[extname(filePath)] ?? "application/octet-stream") + "; charset=utf-8" });
+    const ct = MIME[extname(filePath)] ?? "application/octet-stream";
+    const isText = /^(text\/|application\/(javascript|json|manifest\+json|xml))/.test(ct) || ct === "image/svg+xml";
+    res.writeHead(200, { "Content-Type": ct + (isText ? "; charset=utf-8" : ""), "Cache-Control": cacheControl(filePath) });
     res.end(body);
   } catch {
     json(res, 404, { error: "not found", path: pathname });
