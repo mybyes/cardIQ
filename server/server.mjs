@@ -10,6 +10,7 @@ import { SOURCES, runSource } from "./sources/index.mjs";
 import { WalletState } from "../state.mjs";
 import { planAllocation } from "../planner.mjs";
 import { resolveOffers } from "../offers.mjs";
+import { redemptionPlan, valuePerUnit } from "../valuation.mjs";
 
 seedIfEmpty();
 const PORT = process.env.PORT || 4322;
@@ -86,6 +87,27 @@ const server = createServer(async (req, res) => {
     if (path.startsWith("/api/sources/") && path.endsWith("/run") && req.method === "POST") {
       const id = path.split("/")[3];
       return json(res, 200, await runSource(id, await readBody(req)));
+    }
+
+    // ---- Points Intelligence API (B2B "CardIQ Engine") ----
+    // Stateless: POST { holdings:[{currency, balance}] } → ₹ value (best/typical/floor) per holding,
+    // best redemption path, total idle value, and the single highest-leverage action. Embeddable.
+    if (path === "/api/points" && req.method === "POST") {
+      const body = await readBody(req);
+      const inr = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+      const holdings = (Array.isArray(body.holdings) ? body.holdings : []).map((h) => {
+        const currency = String(h.currency || "");
+        const balance = Number(h.balance) || 0;
+        const plan = redemptionPlan(currency, balance); // null if unknown currency
+        const value = { best: Math.round(balance * valuePerUnit(currency, "best")), typical: Math.round(balance * valuePerUnit(currency, "typical")), floor: Math.round(balance * valuePerUnit(currency, "floor")) };
+        return { currency, name: plan?.name || currency, balance, value, best: plan?.best || null, partners: plan?.partners || [] };
+      });
+      const total = holdings.reduce((a, h) => ({ best: a.best + h.value.best, typical: a.typical + h.value.typical, floor: a.floor + h.value.floor }), { best: 0, typical: 0, floor: 0 });
+      const top = holdings.slice().sort((a, b) => (b.value.best - b.value.floor) - (a.value.best - a.value.floor))[0];
+      const topAction = top && top.value.best > 0
+        ? { currency: top.currency, headline: `Your ${top.name} is worth up to ${inr(top.value.best)}`, detail: `via ${top.best?.path || "transfer"} — vs only ${inr(top.value.floor)} if cashed out. Don't leave ${inr(top.value.best - top.value.floor)} on the table.` }
+        : null;
+      return json(res, 200, { total, holdings, topAction, dataVersion: "curated", note: "Estimates — confirm with issuer. Map your users' cards to currency codes (HDFC_RP, EDGE_MILE, MR_POINT, ICICI_RP, CASHBACK)." });
     }
 
     // ---- catalog ----

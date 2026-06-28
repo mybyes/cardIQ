@@ -91,6 +91,29 @@ experts use."* You can't buy that credibility; you earn it in their communities.
 
 ---
 
+## Parallel bet: B2B2C — "CardIQ Engine" (sidesteps the community grind)
+
+Full pitch + API spec in [B2B-ENGINE.md](B2B-ENGINE.md). The thesis:
+
+- **The category exists and has a strong incumbent already in India.** Ascenda powers
+  *single-program* rewards infra for banks (incl. **Axis's points & miles transfer program**),
+  clients like HSBC/Amex/Capital One. So "be the transfer infra for an issuer" is **taken**.
+- **CardIQ's defensible B2B wedge is different: neutral, cross-card optimization** — "which of
+  *all* your cards to use; what your points *across issuers* are worth." A bank can't offer that
+  (it wants lock-in); the buyer is the **neutral multi-card holder**:
+  1. **Neobanks / multi-card apps** (Fi, Jupiter, OneCard, Slice) — best fit, fast-moving, unconflicted.
+  2. **PFM / wealth** (INDmoney, ET Money) — "points as an asset + how to realize it."
+  3. **OTAs** (MMT/Cleartrip) — "pay with the right points." ⚠️ Avoid issuers as lead (conflict + Ascenda).
+- **The product is the engine, exposed:** `POST /api/points` (Points Intelligence — value + best
+  use, stateless) + an embeddable widget ([web/embed.html](web/embed.html)) + `/api/recommend`
+  (which card) + `/api/plan`. Both shipped & working.
+- **Model:** SaaS (per-MAU/call) + rev-share on card-apps/transfers — bigger & recurring vs D2C subs.
+- **Why it de-risks the postmortem:** partner's users = distribution (no CAC), B2B contracts =
+  monetization, whole base = TAM. **New risks:** build-vs-buy, sales cycle, brand invisibility,
+  accuracy SLAs (defenses in B2B-ENGINE.md).
+- **D2C + B2B reinforce:** D2C earns expert trust + builds the data moat → that credibility is the
+  B2B sales asset ("the cross-card optimizer the experts trust, embeddable").
+
 ## How this addresses the postmortem
 | Cause of death | Mitigation here |
 |---|---|

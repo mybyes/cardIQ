@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CardIQ Engine — embeddable points widget</title>
+    <style>
+      /* Self-contained + the‑able via ?accent= / ?bg= so a partner can match their brand. */
+      * { box-sizing: border-box; margin: 0; }
+      :root { --accent: #a8822e; --ink: #14110a; --bg: #fbf8f1; --line: #e3d8c0; --muted: #6f6757; --good: #2f6b4f; }
+      body { font-family: -apple-system, "Segoe UI", Roboto, Inter, sans-serif; background: transparent; color: var(--ink); padding: 8px; }
+      .w { max-width: 380px; background: var(--bg); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; box-shadow: 0 8px 28px rgba(40,28,8,.10); }
+      .top { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+      .top b { color: var(--accent); }
+      .total { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 6px 0 2px; }
+      .sub { font-size: 12.5px; color: var(--muted); }
+      .rows { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+      .row { display: flex; justify-content: space-between; font-size: 13px; }
+      .row .n { color: var(--ink); } .row .v { font-weight: 600; }
+      .action { background: var(--ink); color: #f1ead9; border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.45; }
+      .action b { color: #f3e7c8; }
+      .cta { display: inline-block; margin-top: 12px; width: 100%; text-align: center; background: var(--accent); color: #14110a; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px; border-radius: 11px; }
+      .by { margin-top: 10px; font-size: 10.5px; color: var(--muted); text-align: center; }
+      .by a { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="w" id="w"><div class="sub">Loading…</div></div>
+
+    <script type="module">
+      // Demo computes client-side via the shared engine so it renders anywhere. In production a
+      // partner calls POST /api/points (same logic, server-side) — see B2B-ENGINE.md.
+      import { redemptionPlan, valuePerUnit } from "/valuation.mjs";
+
+      const qp = new URLSearchParams(location.search);
+      const accent = qp.get("accent"); if (accent) document.documentElement.style.setProperty("--accent", "#" + accent.replace("#", ""));
+      const brand = qp.get("brand") || "CardIQ";
+      const cta = qp.get("cta") || "https://cardiq.app/web/login.html";
+      // holdings via ?h=HDFC_RP:500000,MR_POINT:240000,EDGE_MILE:85000  (defaults to a sample wallet)
+      const raw = qp.get("h") || "HDFC_RP:500000,MR_POINT:240000,EDGE_MILE:85000";
+      const holdings = raw.split(",").map((p) => { const [currency, balance] = p.split(":"); return { currency, balance: Number(balance) || 0 }; });
+
+      const inr = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+      const enriched = holdings.map((h) => {
+        const plan = redemptionPlan(h.currency, h.balance);
+        const value = { best: Math.round(h.balance * valuePerUnit(h.currency, "best")), floor: Math.round(h.balance * valuePerUnit(h.currency, "floor")) };
+        return { ...h, name: plan?.name || h.currency, best: plan?.best || null, value };
+      });
+      const total = enriched.reduce((a, h) => a + h.value.best, 0);
+      const top = enriched.slice().sort((a, b) => (b.value.best - b.value.floor) - (a.value.best - a.value.floor))[0];
+
+      document.getElementById("w").innerHTML = `
+        <div class="top">✦ <b>${brand}</b> · your points</div>
+        <div class="total">${inr(total)}</div>
+        <div class="sub">in reward points — if used well</div>
+        <div class="rows">${enriched.map((h) => `<div class="row"><span class="n">${h.name}</span><span class="v">${inr(h.value.best)}</span></div>`).join("")}</div>
+        ${top && top.value.best > 0 ? `<div class="action">💡 Your <b>${top.name}</b> is worth up to <b>${inr(top.value.best)}</b> via ${top.best?.path || "transfer"} — vs ${inr(top.value.floor)} if cashed out.</div>` : ""}
+        <a class="cta" href="${cta}" target="_blank" rel="noopener">See how to use them →</a>
+        <div class="by">Powered by <a href="https://cardiq.app" target="_blank" rel="noopener">CardIQ Engine</a> · estimates</div>`;
+    </script>
+  </body>
+</html>
