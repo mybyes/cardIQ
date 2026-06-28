@@ -1,0 +1,14 @@
+{
+  "name": "CardIQ — credit-card points optimiser",
+  "short_name": "CardIQ",
+  "description": "Which card to swipe, what your points are worth in ₹, and the best transfer routes to flights & hotels.",
+  "start_url": "/web/login.html",
+  "scope": "/web/",
+  "display": "standalone",
+  "background_color": "#ece4d4",
+  "theme_color": "#14110a",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/web/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

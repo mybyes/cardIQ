@@ -8,9 +8,21 @@
          Leave empty when one server hosts both (Railway full-stack) or for local dev. -->
     <meta name="cardiq-api" content="" />
     <script>if (!localStorage.getItem("cardiq-session")) { try { sessionStorage.setItem("cardiq-after", location.pathname + location.hash); } catch (e) {} location.replace("/web/login.html"); }</script>
+    <meta name="theme-color" content="#14110a" />
+    <link rel="manifest" href="/web/manifest.webmanifest" />
+    <link rel="icon" href="/web/icon.svg" type="image/svg+xml" />
+    <script>if ("serviceWorker" in navigator) { addEventListener("load", function () { navigator.serviceWorker.register("/web/sw.js").catch(function () {}); }); }</script>
+    <!-- modulepreload: fetch the app's core modules in parallel instead of discovering them one-by-one -->
+    <link rel="modulepreload" href="/web/app.js" />
+    <link rel="modulepreload" href="/data.mjs" />
+    <link rel="modulepreload" href="/web/store.mjs" />
+    <link rel="modulepreload" href="/valuation.mjs" />
+    <link rel="modulepreload" href="/web/transfers.mjs" />
+    <link rel="modulepreload" href="/web/concierge.mjs" />
+    <link rel="modulepreload" href="/web/perks.mjs" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <style>
       :root {
         --font-display: "Fraunces", Georgia, "Times New Roman", serif;

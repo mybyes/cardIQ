@@ -1293,4 +1293,11 @@ function applyHashTab() {
 applyHashTab();
 window.addEventListener("hashchange", applyHashTab);
 
-syncFromPlatform(); // upgrade to live platform data if the API is reachable
+// Upgrade to live platform data only when an API is actually configured, and defer it to idle
+// so it never competes with first paint — saves a doomed round-trip on static/low-bandwidth loads.
+(function () {
+  const apiConfigured = !!document.querySelector('meta[name="cardiq-api"]')?.content;
+  if (!apiConfigured) return; // bundled data already rendered; skip the network hop
+  const run = () => syncFromPlatform();
+  "requestIdleCallback" in window ? requestIdleCallback(run, { timeout: 2500 }) : setTimeout(run, 1200);
+})();
