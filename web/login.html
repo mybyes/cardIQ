@@ -102,7 +102,18 @@
       .sheet .ssub { color: var(--muted); font-size: 14px; margin: 0 auto 20px; max-width: 310px; }
       .gacct { display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; font: inherit; transition: border-color .15s, background .15s, transform .12s; }
       .gacct:hover { border-color: var(--gold); background: #fff; transform: translateY(-1px); }
+      .gacct + .gacct { margin-top: 8px; }
       .gacct + .useother { margin-top: 10px; }
+      .gform { display: block; } /* beats the global `form { display:flex }` */
+      .gform[hidden] { display: none; }
+      .gform input { width: 100%; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; font: inherit; color: var(--text); }
+      .gform input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(168,130,46,.18); }
+      .gform .g-err { color: #9c4128; font-size: 12.5px; margin-top: 8px; }
+      .gform .gform-row { display: flex; gap: 10px; margin-top: 12px; }
+      .gform .g-back { background: transparent; border: 1px solid var(--line); border-radius: 11px; padding: 11px 16px; font: 600 14px Inter; color: var(--muted); cursor: pointer; }
+      .gform .g-back:hover { color: var(--text); border-color: var(--gold); }
+      .gform .g-continue { flex: 1; background: var(--ink); color: #f1ead9; border: 0; border-radius: 11px; padding: 11px; font: 600 14px Inter; cursor: pointer; }
+      .gform .g-continue:hover { filter: brightness(1.15); }
       .gacct .av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #d8bd84, #a8822e); color: #2a2008; display: flex; align-items: center; justify-content: center; font: 600 16px Inter; flex: none; }
       .gacct .nm { font: 600 14px Inter; color: var(--text); }
       .gacct .em { font-size: 12.5px; color: var(--muted); }
@@ -474,17 +485,29 @@
     <div class="sheet-bg" id="gsheet">
       <div class="sheet" role="dialog" aria-modal="true" aria-label="Sign in to CardIQ with Google">
         <svg class="glogo" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
-        <h3>Sign in to CardIQ</h3>
-        <p class="ssub">Choose an account to continue. CardIQ uses Google only to sign you in.</p>
-        <button class="gacct" id="gacct-demo" type="button">
-          <span class="av">R</span>
-          <span><span class="nm">Ranvijay Maloo</span><br><span class="em">ranvijay.maloo@gmail.com</span></span>
-          <span class="ar">&rsaquo;</span>
-        </button>
-        <button class="useother" id="g-other" type="button"><span class="plus">+</span> Use another account</button>
+        <h3>Choose an account</h3>
+        <p class="ssub">to continue to CardIQ</p>
+        <div id="g-list">
+          <button class="gacct" type="button" data-name="Ranvijay Maloo" data-email="ranvijay.maloo@gmail.com">
+            <span class="av">R</span>
+            <span><span class="nm">Ranvijay Maloo</span><br><span class="em">ranvijay.maloo@gmail.com</span></span>
+            <span class="ar">&rsaquo;</span>
+          </button>
+          <button class="gacct" type="button" data-name="Ranvijay (work)" data-email="ranvijay@cardiq.app">
+            <span class="av" style="background:linear-gradient(135deg,#2b2519,#14110a);color:#efe2c2">R</span>
+            <span><span class="nm">Ranvijay (work)</span><br><span class="em">ranvijay@cardiq.app</span></span>
+            <span class="ar">&rsaquo;</span>
+          </button>
+          <button class="useother" id="g-other" type="button"><span class="plus">+</span> Use another account</button>
+        </div>
+        <form id="g-form" class="gform" hidden novalidate>
+          <input type="email" id="g-email" placeholder="you@gmail.com" autocomplete="email" />
+          <div class="g-err" id="g-err" hidden>Enter a valid email address.</div>
+          <div class="gform-row"><button type="button" id="g-back" class="g-back">&lsaquo; Back</button><button type="submit" class="g-continue">Continue</button></div>
+        </form>
         <div class="scopes"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> <span>CardIQ will see your <b>name and email only</b>. It never reads your inbox, and never sees your card numbers or bank login.</span></div>
         <button class="cancel" id="g-cancel" type="button">Cancel</button>
-        <div class="by">Secured by Google · OAuth 2.0</div>
+        <div class="by">Demo accounts — connect a Google Client ID to show your real accounts · Secured by Google · OAuth 2.0</div>
       </div>
     </div>
 
@@ -508,7 +531,14 @@
       }
 
       var sheet = document.getElementById("gsheet");
-      function openSheet() { sheet.classList.add("on"); }
+      function resetSheet() {
+        var f = document.getElementById("g-form"), l = document.getElementById("g-list"), err = document.getElementById("g-err");
+        if (f) f.hidden = true;
+        if (l) l.hidden = false;
+        if (err) err.hidden = true;
+        var em = document.getElementById("g-email"); if (em) em.value = "";
+      }
+      function openSheet() { resetSheet(); sheet.classList.add("on"); }
       function closeSheet() { sheet.classList.remove("on"); }
 
       // Real Google Identity Services — loaded only when a Client ID is configured.
@@ -530,8 +560,25 @@
 
       // Sign-in entry points → Google auth flow
       ["enter-link", "google-hero"].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener("click", function (e) { e.preventDefault(); startGoogle(); }); });
-      document.getElementById("gacct-demo").addEventListener("click", function () { finishSignIn({ name: "Ranvijay Maloo", email: "ranvijay.maloo@gmail.com" }); });
-      document.getElementById("g-other").addEventListener("click", function () { var em = prompt("Continue with which Google account?"); if (em) finishSignIn({ name: em.split("@")[0], email: em }); });
+      // pick an account
+      document.querySelectorAll("#g-list .gacct").forEach(function (b) {
+        b.addEventListener("click", function () { finishSignIn({ name: b.dataset.name, email: b.dataset.email }); });
+      });
+      // "Use another account" → inline, validated email form (no browser prompt)
+      document.getElementById("g-other").addEventListener("click", function () {
+        document.getElementById("g-list").hidden = true;
+        document.getElementById("g-form").hidden = false;
+        document.getElementById("g-email").focus();
+      });
+      document.getElementById("g-back").addEventListener("click", resetSheet);
+      document.getElementById("g-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var inp = document.getElementById("g-email"), em = inp.value.trim();
+        var ok = em && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+        if (!ok) { document.getElementById("g-err").hidden = false; inp.focus(); return; }
+        finishSignIn({ name: em.split("@")[0], email: em });
+      });
+      document.getElementById("g-email").addEventListener("input", function () { document.getElementById("g-err").hidden = true; });
       document.getElementById("g-cancel").addEventListener("click", closeSheet);
       sheet.addEventListener("click", function (e) { if (e.target === sheet) closeSheet(); });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
